@@ -30,6 +30,15 @@
             <h2 id="stateTitle">Flap Through Neon Gates</h2>
             <p id="stateCopy">Avoid the towers, collect points, and keep your tiny rocket bird airborne.</p>
             <button id="primaryButton" type="button">Start Game</button>
+            <button id="secretButton" type="button" class="secret-button" aria-expanded="false" aria-controls="secretUnlock">Secret</button>
+            <form id="secretUnlock" class="secret-unlock" hidden>
+              <label for="secretCodeInput">Enter secret code</label>
+              <div class="secret-entry-row">
+                <input id="secretCodeInput" name="secretCode" type="text" inputmode="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="secret code">
+                <button id="secretSubmitButton" type="submit">Unlock</button>
+              </div>
+              <p id="secretMessage" class="secret-message" aria-live="polite">Find the hidden code to unlock a mystery bird.</p>
+            </form>
             <p class="help">Controls: tap anywhere, click, press Space, ArrowUp, or the flap button. Press P to pause.</p>
           </div>
         </div>
@@ -52,6 +61,10 @@
           <button class="character-option" type="button" data-character="midnight" aria-pressed="false">
             <canvas width="72" height="56" aria-hidden="true" data-preview="midnight"></canvas>
             <span>Midnight</span>
+          </button>
+          <button class="character-option locked" type="button" data-character="sixseven" aria-pressed="false" aria-disabled="true">
+            <canvas width="72" height="56" aria-hidden="true" data-preview="sixseven"></canvas>
+            <span>6/7</span>
           </button>
         </div>
       </section>

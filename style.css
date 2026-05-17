@@ -177,9 +177,68 @@ button {
 
 #primaryButton {
   background: var(--accent);
-  margin: 16px 0 12px;
+  margin: 16px 0 8px;
   padding: 12px 16px;
   width: 100%;
+}
+
+.secret-button {
+  background: linear-gradient(180deg, #c4b5fd, #818cf8);
+  border: 3px solid #020617;
+  box-shadow: 4px 4px 0 #020617;
+  color: #020617;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  margin: 0 0 12px;
+  padding: 10px 16px;
+  transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+  width: 100%;
+}
+
+.secret-unlock {
+  background: rgba(2, 6, 23, 0.4);
+  border: 2px dashed rgba(196, 181, 253, 0.7);
+  display: grid;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 10px;
+  text-align: left;
+}
+
+.secret-unlock[hidden] {
+  display: none;
+}
+
+.secret-unlock label,
+.secret-message {
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.secret-entry-row {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr auto;
+}
+
+#secretCodeInput {
+  background: #020617;
+  border: 2px solid rgba(196, 181, 253, 0.7);
+  color: var(--ink);
+  font: inherit;
+  min-width: 0;
+  padding: 9px 10px;
+}
+
+#secretSubmitButton {
+  background: #c4b5fd;
+  border: 2px solid #020617;
+  box-shadow: 3px 3px 0 #020617;
+  color: #020617;
+  font-weight: 900;
+  padding: 9px 10px;
 }
 
 .character-picker {
@@ -205,7 +264,7 @@ button {
 .character-options {
   display: grid;
   gap: 8px;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
 }
 
 .character-option {
@@ -240,6 +299,19 @@ button {
   background: linear-gradient(180deg, rgba(250, 204, 21, 0.28), rgba(56, 189, 248, 0.18));
   border-color: var(--accent);
   color: #fef9c3;
+}
+
+.character-option.locked {
+  filter: grayscale(0.8) brightness(0.62);
+  opacity: 0.58;
+}
+
+.character-option.locked span::after {
+  content: ' LOCKED';
+  color: #c4b5fd;
+  display: block;
+  font-size: 0.54rem;
+  letter-spacing: 0.02em;
 }
 
 .controls {

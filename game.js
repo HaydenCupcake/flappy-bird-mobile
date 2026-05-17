@@ -10,6 +10,10 @@ const primaryButton = document.getElementById('primaryButton');
 const flapButton = document.getElementById('flapButton');
 const pauseButton = document.getElementById('pauseButton');
 const soundButton = document.getElementById('soundButton');
+const secretButton = document.getElementById('secretButton');
+const secretUnlock = document.getElementById('secretUnlock');
+const secretCodeInput = document.getElementById('secretCodeInput');
+const secretMessage = document.getElementById('secretMessage');
 const selectedCharacterText = document.getElementById('selectedCharacterText');
 const characterButtons = [...document.querySelectorAll('[data-character]')];
 const previewCanvases = [...document.querySelectorAll('[data-preview]')];
@@ -19,6 +23,8 @@ const HEIGHT = 768;
 const STORAGE_KEY = 'sky-hopper-best-score';
 const STORAGE_KEY_CHARACTER = 'sky-hopper-character';
 const STORAGE_KEY_AUDIO = 'sky-hopper-audio-enabled';
+const STORAGE_KEY_SECRET_CHARACTER = 'sky-hopper-secret-sixseven-unlocked';
+const SECRET_UNLOCK_CODE = 'ilove67';
 const groundHeight = 96;
 
 const CHARACTERS = [
@@ -64,10 +70,27 @@ const CHARACTERS = [
     trail: '#818cf8',
     scoreBurst: '#22d3ee',
   },
+  {
+    id: 'sixseven',
+    name: 'Six Seven',
+    locked: true,
+    badge: '67',
+    body: '#a855f7',
+    crest: '#facc15',
+    wing: '#22d3ee',
+    beak: '#fb7185',
+    beakShadow: '#e11d48',
+    eye: '#f8fafc',
+    pupil: '#111827',
+    shadow: '#020617',
+    trail: '#c084fc',
+    scoreBurst: '#facc15',
+  },
 ];
 
 let bestScore = Number(localStorage.getItem(STORAGE_KEY) || 0);
 let selectedCharacterId = localStorage.getItem(STORAGE_KEY_CHARACTER) || CHARACTERS[0].id;
+let secretCharacterUnlocked = localStorage.getItem(STORAGE_KEY_SECRET_CHARACTER) === 'true';
 let state = 'ready';
 let score = 0;
 let lastTime = 0;
@@ -97,12 +120,54 @@ let particles = [];
 
 bestText.textContent = bestScore;
 
+function isCharacterUnlocked(character) {
+  return Boolean(character) && (!character.locked || secretCharacterUnlocked);
+}
+
 function getSelectedCharacter() {
-  return CHARACTERS.find((character) => character.id === selectedCharacterId) || CHARACTERS[0];
+  const character = CHARACTERS.find((entry) => entry.id === selectedCharacterId);
+  return character && isCharacterUnlocked(character) ? character : CHARACTERS[0];
+}
+
+function syncSecretCharacterLockState() {
+  characterButtons.forEach((button) => {
+    const character = CHARACTERS.find((entry) => entry.id === button.dataset.character);
+    const locked = Boolean(character && !isCharacterUnlocked(character));
+    button.classList.toggle('locked', locked);
+    button.setAttribute('aria-disabled', String(locked));
+    button.title = locked ? 'Enter the secret code to unlock this bird.' : '';
+  });
+}
+
+function unlockSecretCharacter() {
+  const enteredCode = secretCodeInput.value.trim().toLowerCase();
+  if (enteredCode !== SECRET_UNLOCK_CODE) {
+    secretMessage.textContent = 'Wrong code. Try again.';
+    secretCodeInput.select();
+    playPauseSound();
+    return;
+  }
+
+  secretCharacterUnlocked = true;
+  localStorage.setItem(STORAGE_KEY_SECRET_CHARACTER, 'true');
+  secretMessage.textContent = 'Unlocked Six Seven! The 6/7 bird is now playable.';
+  secretButton.textContent = 'Unlocked';
+  secretButton.setAttribute('aria-expanded', 'true');
+  syncSecretCharacterLockState();
+  selectCharacter('sixseven');
 }
 
 function selectCharacter(characterId, playSound = true) {
   const character = CHARACTERS.find((entry) => entry.id === characterId) || CHARACTERS[0];
+  if (!isCharacterUnlocked(character)) {
+    secretMessage.textContent = 'That bird is locked. Tap Secret and enter the code.';
+    secretUnlock.hidden = false;
+    secretButton.setAttribute('aria-expanded', 'true');
+    secretCodeInput.focus();
+    playPauseSound();
+    return;
+  }
+
   selectedCharacterId = character.id;
   localStorage.setItem(STORAGE_KEY_CHARACTER, character.id);
   selectedCharacterText.textContent = character.name;
@@ -583,6 +648,15 @@ function drawBirdSprite(targetCtx, character, wingY) {
   targetCtx.fillRect(7, -11, 4, 4);
   targetCtx.fillStyle = character.wing;
   targetCtx.fillRect(-20, wingY, 19, 12);
+  if (character.badge === '67') {
+    targetCtx.fillStyle = '#fef3c7';
+    targetCtx.fillRect(-11, -10, 18, 13);
+    targetCtx.fillStyle = '#4c1d95';
+    targetCtx.font = '900 10px monospace';
+    targetCtx.textAlign = 'center';
+    targetCtx.textBaseline = 'middle';
+    targetCtx.fillText('67', -2, -3);
+  }
 }
 
 function drawParticles() {
@@ -620,6 +694,7 @@ function loop(now) {
 }
 
 function handleKey(event) {
+  if (event.target === secretCodeInput) return;
   if (event.code === 'Space' || event.code === 'ArrowUp') {
     event.preventDefault();
     flap();
@@ -637,6 +712,16 @@ primaryButton.addEventListener('click', () => {
 flapButton.addEventListener('click', flap);
 pauseButton.addEventListener('click', togglePause);
 soundButton.addEventListener('click', toggleSound);
+secretButton.addEventListener('click', () => {
+  const expanded = secretUnlock.hidden;
+  secretUnlock.hidden = !expanded;
+  secretButton.setAttribute('aria-expanded', String(expanded));
+  if (expanded) secretCodeInput.focus();
+});
+secretUnlock.addEventListener('submit', (event) => {
+  event.preventDefault();
+  unlockSecretCharacter();
+});
 characterButtons.forEach((button) => {
   button.addEventListener('click', () => selectCharacter(button.dataset.character));
 });
@@ -657,6 +742,14 @@ document.addEventListener('visibilitychange', () => {
 });
 
 updateSoundButton();
+syncSecretCharacterLockState();
+if (secretCharacterUnlocked) {
+  secretButton.textContent = 'Unlocked';
+  secretMessage.textContent = 'Six Seven is unlocked and ready to fly.';
+}
+if (!isCharacterUnlocked(CHARACTERS.find((entry) => entry.id === selectedCharacterId))) {
+  selectedCharacterId = CHARACTERS[0].id;
+}
 selectCharacter(selectedCharacterId, false);
 setOverlay(true, 'Ready', 'Flap Through Neon Gates', 'Avoid the towers, collect points, and keep your tiny rocket bird airborne.', 'Start Game');
 startStartScreenMusic();
