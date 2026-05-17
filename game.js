@@ -80,8 +80,9 @@ let masterGain = null;
 let musicTimer = 0;
 let musicStep = 0;
 let musicMode = '';
-let soundEnabled = localStorage.getItem(STORAGE_KEY_AUDIO) === 'true';
+let soundEnabled = localStorage.getItem(STORAGE_KEY_AUDIO) !== 'false';
 let backgroundOscillators = [];
+let audioUnlockInstalled = false;
 
 const bird = {
   x: 112,
@@ -116,7 +117,7 @@ function selectCharacter(characterId, playSound = true) {
   if (playSound) playCharacterSelectSound();
 }
 
-function setupAudio() {
+function setupAudio(installUnlock = true) {
   if (!soundEnabled) return null;
   if (!audioContext) {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -126,9 +127,39 @@ function setupAudio() {
     masterGain.gain.value = 0.42;
     masterGain.connect(audioContext.destination);
   }
-  if (audioContext.state === 'suspended') audioContext.resume();
+  if (audioContext.state === 'suspended') {
+    audioContext.resume();
+    if (installUnlock) installAudioUnlock();
+  }
   if (masterGain) masterGain.gain.setTargetAtTime(0.42, audioContext.currentTime, 0.015);
   return audioContext;
+}
+
+function removeAudioUnlock() {
+  if (!audioUnlockInstalled) return;
+  audioUnlockInstalled = false;
+  document.removeEventListener('pointerdown', unlockAudio, true);
+  document.removeEventListener('click', unlockAudio, true);
+  window.removeEventListener('keydown', unlockAudio, true);
+}
+
+function installAudioUnlock() {
+  if (audioUnlockInstalled || !soundEnabled) return;
+  audioUnlockInstalled = true;
+  document.addEventListener('pointerdown', unlockAudio, true);
+  document.addEventListener('click', unlockAudio, true);
+  window.addEventListener('keydown', unlockAudio, true);
+}
+
+function unlockAudio() {
+  removeAudioUnlock();
+  if (!soundEnabled) return;
+  const audio = setupAudio(false);
+  if (audio && audio.state === 'suspended') audio.resume();
+  if (state === 'ready' || state === 'gameover') {
+    stopBackgroundMusic();
+    startStartScreenMusic();
+  }
 }
 
 function updateSoundButton() {
@@ -148,6 +179,7 @@ function toggleSound() {
     if (state === 'playing') startGameplayMusic();
     else if (state === 'ready' || state === 'gameover') startStartScreenMusic();
   } else {
+    removeAudioUnlock();
     stopBackgroundMusic();
     if (masterGain) masterGain.gain.setTargetAtTime(0, audioContext.currentTime, 0.015);
   }
@@ -627,6 +659,7 @@ document.addEventListener('visibilitychange', () => {
 updateSoundButton();
 selectCharacter(selectedCharacterId, false);
 setOverlay(true, 'Ready', 'Flap Through Neon Gates', 'Avoid the towers, collect points, and keep your tiny rocket bird airborne.', 'Start Game');
+startStartScreenMusic();
 draw();
 animationFrame = requestAnimationFrame(loop);
 

@@ -7,12 +7,13 @@ const html = readFileSync(join(root, 'index.html'), 'utf8');
 const js = readFileSync(join(root, 'game.js'), 'utf8');
 
 assert.match(html, /id="soundButton"/, 'sound toggle button should exist');
-assert.match(html, /aria-label="Enable sound"/, 'sound button should expose its purpose');
+assert.match(html, /aria-label="Mute sound"/, 'sound button should expose its default-on purpose');
 
 assert.match(js, /STORAGE_KEY_AUDIO = 'sky-hopper-audio-enabled'/, 'audio preference localStorage key should exist');
-assert.match(js, /localStorage\.getItem\(STORAGE_KEY_AUDIO\) === 'true'/, 'audio should default off unless persisted on');
+assert.match(js, /localStorage\.getItem\(STORAGE_KEY_AUDIO\) !== 'false'/, 'audio should default on unless persisted off');
 assert.match(js, /localStorage\.setItem\(STORAGE_KEY_AUDIO, String\(soundEnabled\)\)/, 'audio preference should persist');
 assert.match(js, /selectCharacter\(selectedCharacterId, false\)/, 'initial character render should not autoplay audio');
+assert.match(js, /startStartScreenMusic\(\);\ndraw\(\);/, 'start-screen music should be attempted after the ready overlay is shown');
 assert.match(js, /window\.AudioContext \|\| window\.webkitAudioContext/, 'Web Audio API setup should support browser prefixes');
 assert.match(js, /createOscillator\(/, 'generated audio should use oscillators');
 assert.match(js, /createGain\(/, 'generated audio should use gain nodes');
@@ -25,6 +26,8 @@ assert.match(js, /createGain\(/, 'generated audio should use gain nodes');
   'startGameplayMusic',
   'startBackgroundMusic',
   'stopBackgroundMusic',
+  'installAudioUnlock',
+  'unlockAudio',
   'playFlapSound',
   'playScoreSound',
   'playCharacterSelectSound',
@@ -38,6 +41,11 @@ assert.match(js, /createGain\(/, 'generated audio should use gain nodes');
 assert.match(js, /startBackgroundMusic\(\)/, 'music should be started by gameplay flow');
 assert.match(js, /stopBackgroundMusic\(\)/, 'music should be stopped by pause, game over, or visibility flow');
 assert.match(js, /musicMode = ''/, 'music mode should track the active background loop');
+assert.match(js, /document\.addEventListener\('pointerdown', unlockAudio, true\)/, 'pointerdown should unlock autoplay-blocked audio before gameplay handlers');
+assert.match(js, /document\.addEventListener\('click', unlockAudio, true\)/, 'click should unlock autoplay-blocked audio');
+assert.match(js, /window\.addEventListener\('keydown', unlockAudio, true\)/, 'keydown should unlock autoplay-blocked audio before gameplay handlers');
+assert.match(js, /if \(audioContext\.state === 'suspended'\) \{[\s\S]*installAudioUnlock\(\)/, 'suspended audio contexts should install the first-interaction unlock');
+assert.match(js, /function unlockAudio\(\) \{[\s\S]*stopBackgroundMusic\(\);[\s\S]*startStartScreenMusic\(\);[\s\S]*\}/, 'first interaction should restart start-screen music while ready or gameover');
 assert.match(js, /startMusicMode\('start-screen', \['ready', 'gameover'\]/, 'start-screen music should be limited to ready and gameover states');
 assert.match(js, /startMusicMode\('gameplay', \['playing'\]/, 'gameplay music should be limited to playing state');
 assert.match(js, /if \(state === 'playing'\) startGameplayMusic\(\)/, 'background music dispatcher should choose gameplay music while playing');

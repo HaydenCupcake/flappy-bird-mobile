@@ -11,7 +11,7 @@ Controls:
 - Tap or click anywhere on the game canvas to flap.
 - Pick Classic, Ruby, or Midnight from the bird selector before or between runs.
 - Use the on-screen Flap button on touch devices.
-- Use the Sound Off/Sound On button to enable or mute generated music and effects.
+- Use the Sound On/Sound Off button to mute or enable generated music and effects.
 - Press `Space` or `ArrowUp` to flap.
 - Press `P` or the Pause button to pause/resume.
 
@@ -21,7 +21,7 @@ Controls:
 - Start screen, pause/resume, visibility auto-pause, game over, and restart flow.
 - Score display and best score saved with `localStorage`.
 - Three selectable bird characters with the current pick saved on this device.
-- Browser-safe generated Web Audio: muted by default, saved sound preference, separate start-screen and gameplay music loops, and effects for flaps, gates, selection, pause/resume, and game over.
+- Browser-safe generated Web Audio: sound on by default, start-screen music attempts to play on load when browsers allow it, saved sound preference, separate start-screen and gameplay music loops, and effects for flaps, gates, selection, pause/resume, and game over.
 - Increasing speed and tighter gate spacing as your score rises.
 - Original pixel-art arcade visuals with no copyrighted Flappy Bird assets.
 - Accessible visible instructions and keyboard controls.
