@@ -65,6 +65,7 @@ assert.match(js, /SECRET_UNLOCK_CODE = 'ilove67'/, 'secret unlock code should be
 assert.match(js, /function selectCharacter/, 'character selection handler should exist');
 assert.match(js, /Enter the secret code to unlock this character\./, 'locked secret character click should show the requested unlock message');
 assert.match(js, /function unlockSecretCharacter/, 'secret character unlock handler should exist');
+assert.match(js, /document\.addEventListener\('pointerdown', \(event\) => \{[\s\S]*if \(event\.target === secretCodeInput\) return;[\s\S]*if \(event\.target\.closest\('button'\)\) return;[\s\S]*flap\(\);[\s\S]*\}\);/, 'pointer taps on the secret code input should not start the game');
 assert.match(js, /enteredCode === 'logan'[\s\S]*clockCharacterUnlocked = true;[\s\S]*selectCharacter\('clock'\)/, 'Logan code should unlock and select the clock character');
 assert.match(js, /enteredCode === SECRET_UNLOCK_CODE[\s\S]*secretCharacterUnlocked = true;[\s\S]*selectCharacter\('sixseven'\)/, 'ilove67 code should still unlock and select Six Seven');
 assert.match(js, /enteredCode\.replace\(\/\\s\+\/g, ''\) === 'queenlia'[\s\S]*sugarCharacterUnlocked = true;[\s\S]*selectCharacter\('sugar'\)/, 'Queen Lia or QueenLia should unlock and select Sugar Star');

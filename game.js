@@ -937,6 +937,7 @@ characterButtons.forEach((button) => {
   button.addEventListener('click', () => selectCharacter(button.dataset.character));
 });
 document.addEventListener('pointerdown', (event) => {
+  if (event.target === secretCodeInput) return;
   if (event.target.closest('button')) return;
   flap();
 });
