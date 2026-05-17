@@ -31,6 +31,7 @@ assert.doesNotMatch(js, /localStorage\.setItem\([^)]*SECRET/i, 'secret unlock sh
 assert.match(js, /let secretCharacterUnlocked = false;/, 'secret character should start locked for each page session');
 assert.match(js, /SECRET_UNLOCK_CODE = 'ilove67'/, 'secret unlock code should be ilove67');
 assert.match(js, /function selectCharacter/, 'character selection handler should exist');
+assert.match(js, /Enter the secret code to unlock this character\./, 'locked secret character click should show the requested unlock message');
 assert.match(js, /function unlockSecretCharacter/, 'secret character unlock handler should exist');
 assert.match(js, /function syncSecretCharacterLockState/, 'secret character should stay locked until code entry');
 assert.match(js, /function drawCharacterPreview/, 'character picker preview renderer should exist');

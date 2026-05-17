@@ -158,7 +158,7 @@ function unlockSecretCharacter() {
 function selectCharacter(characterId, playSound = true) {
   const character = CHARACTERS.find((entry) => entry.id === characterId) || CHARACTERS[0];
   if (!isCharacterUnlocked(character)) {
-    secretMessage.textContent = 'That bird is locked. Tap Secret and enter the code.';
+    secretMessage.textContent = 'Enter the secret code to unlock this character.';
     secretUnlock.hidden = false;
     secretButton.setAttribute('aria-expanded', 'true');
     secretCodeInput.focus();
