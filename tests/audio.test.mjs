@@ -57,7 +57,7 @@ assert.match(js, /playTone\(melody\[musicStep % melody\.length\], 0\.16, 'triang
 assert.match(js, /playTone\(bass\[musicStep % bass\.length\], 0\.18, 'sine', 0\.048\)/, 'background bass should be 50% louder');
 assert.match(js, /function playSecretUnlockSound\(\) \{[\s\S]*playScoreSound\(\);[\s\S]*\}/, 'correct secret code should reuse the existing happy score sound');
 assert.match(js, /function playSecretFailureSound\(\) \{[\s\S]*playGameOverSound\(\);[\s\S]*\}/, 'wrong secret code should reuse the existing failure game-over sound');
-assert.match(js, /enteredCode !== SECRET_UNLOCK_CODE[\s\S]*playSecretFailureSound\(\)/, 'wrong secret code should play the failure sound');
+assert.match(js, /secretMessage\.textContent = 'Wrong code\. Try again\.';[\s\S]*playSecretFailureSound\(\)/, 'wrong secret code should play the failure sound');
 assert.match(js, /secretCharacterUnlocked = true;[\s\S]*playSecretUnlockSound\(\)/, 'correct secret code should play the happy unlock sound');
 assert.match(js, /function playQuackSound\(\) \{[\s\S]*playTone\(260, 0\.09, 'sawtooth', 0\.16\);[\s\S]*playTone\(210, 0\.12, 'sawtooth', 0\.14, 0\.06\);[\s\S]*\}/, 'duck should have a quack sound made from low sawtooth tones');
 assert.match(js, /getSelectedCharacter\(\)\.id === 'duck' \? playQuackSound\(\) : playFlapSound\(\)/, 'duck should quack instead of using the normal flap sound');

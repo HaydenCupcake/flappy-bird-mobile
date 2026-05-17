@@ -102,11 +102,29 @@ const CHARACTERS = [
     trail: '#86efac',
     scoreBurst: '#22c55e',
   },
+  {
+    id: 'clock',
+    name: 'Logan Clock',
+    locked: true,
+    secretCode: 'logan',
+    species: 'clock',
+    body: '#f8fafc',
+    crest: '#e2e8f0',
+    wing: '#bae6fd',
+    beak: '#38bdf8',
+    beakShadow: '#0284c7',
+    eye: '#f8fafc',
+    pupil: '#0f172a',
+    shadow: '#334155',
+    trail: '#e0f2fe',
+    scoreBurst: '#f8fafc',
+  },
 ];
 
 let bestScore = Number(localStorage.getItem(STORAGE_KEY) || 0);
 let selectedCharacterId = localStorage.getItem(STORAGE_KEY_CHARACTER) || CHARACTERS[0].id;
 let secretCharacterUnlocked = false;
+let clockCharacterUnlocked = false;
 let state = 'ready';
 let score = 0;
 let lastTime = 0;
@@ -139,6 +157,7 @@ bestText.textContent = bestScore;
 function isCharacterUnlocked(character) {
   if (!character) return false;
   if (character.unlockScore) return character.unlockScore <= Math.max(score, bestScore);
+  if (character.id === 'clock') return clockCharacterUnlocked;
   return !character.locked || secretCharacterUnlocked;
 }
 
@@ -161,20 +180,30 @@ function syncSecretCharacterLockState() {
 
 function unlockSecretCharacter() {
   const enteredCode = secretCodeInput.value.trim().toLowerCase();
-  if (enteredCode !== SECRET_UNLOCK_CODE) {
-    secretMessage.textContent = 'Wrong code. Try again.';
-    secretCodeInput.select();
-    playSecretFailureSound();
+  if (enteredCode === 'logan') {
+    clockCharacterUnlocked = true;
+    playSecretUnlockSound();
+    secretMessage.textContent = 'Unlocked Logan Clock for this game session! Enter Logan again next time the game page starts.';
+    secretButton.textContent = 'Unlocked';
+    secretButton.setAttribute('aria-expanded', 'true');
+    syncSecretCharacterLockState();
+    selectCharacter('clock');
+    return;
+  }
+  if (enteredCode === SECRET_UNLOCK_CODE) {
+    secretCharacterUnlocked = true;
+    playSecretUnlockSound();
+    secretMessage.textContent = 'Unlocked Six Seven for this game session! Enter the code again next time the game page starts.';
+    secretButton.textContent = 'Unlocked';
+    secretButton.setAttribute('aria-expanded', 'true');
+    syncSecretCharacterLockState();
+    selectCharacter('sixseven');
     return;
   }
 
-  secretCharacterUnlocked = true;
-  playSecretUnlockSound();
-  secretMessage.textContent = 'Unlocked Six Seven for this game session! Enter the code again next time the game page starts.';
-  secretButton.textContent = 'Unlocked';
-  secretButton.setAttribute('aria-expanded', 'true');
-  syncSecretCharacterLockState();
-  selectCharacter('sixseven');
+  secretMessage.textContent = 'Wrong code. Try again.';
+  secretCodeInput.select();
+  playSecretFailureSound();
 }
 
 function selectCharacter(characterId, playSound = true) {
@@ -605,7 +634,7 @@ function drawBackground() {
   for (let i = 0; i < 7; i += 1) {
     const x = ((i * 92 - groundOffset * 0.3) % (WIDTH + 90)) - 60;
     const y = 72 + (i % 3) * 82;
-    pixelCloud(x, y, 2 + (i % 2));
+    getSelectedCharacter().species === 'clock' ? drawClockCloud(x, y, 2 + (i % 2)) : pixelCloud(x, y, 2 + (i % 2));
   }
 
   ctx.fillStyle = 'rgba(15, 23, 42, 0.22)';
@@ -622,6 +651,25 @@ function pixelCloud(x, y, scale) {
   ctx.fillRect(x, y + block, block * 5, block * 2);
   ctx.fillRect(x + block, y, block * 3, block);
   ctx.fillRect(x + block * 4, y + block * 1.5, block * 2, block);
+}
+
+function drawClockCloud(x, y, scale) {
+  const radius = 15 * scale;
+  ctx.save();
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.78)';
+  ctx.beginPath();
+  ctx.arc(x + radius, y + radius, radius, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(15, 23, 42, 0.35)';
+  ctx.lineWidth = Math.max(2, scale);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y + radius);
+  ctx.lineTo(x + radius, y + radius * 0.45);
+  ctx.moveTo(x + radius, y + radius);
+  ctx.lineTo(x + radius * 1.45, y + radius);
+  ctx.stroke();
+  ctx.restore();
 }
 
 function drawPipes() {
@@ -674,6 +722,33 @@ function drawBird() {
 }
 
 function drawBirdSprite(targetCtx, character, wingY) {
+  if (character.species === 'clock') {
+    targetCtx.fillStyle = character.wing;
+    targetCtx.fillRect(-30, wingY - 6, 18, 12);
+    targetCtx.fillRect(12, wingY - 6, 18, 12);
+    targetCtx.fillStyle = character.shadow;
+    targetCtx.beginPath();
+    targetCtx.arc(0, -3, 20, 0, Math.PI * 2);
+    targetCtx.fill();
+    targetCtx.fillStyle = character.body;
+    targetCtx.beginPath();
+    targetCtx.arc(0, -3, 18, 0, Math.PI * 2);
+    targetCtx.fill();
+    targetCtx.strokeStyle = character.shadow;
+    targetCtx.lineWidth = 3;
+    targetCtx.stroke();
+    targetCtx.strokeStyle = character.pupil;
+    targetCtx.lineWidth = 2;
+    targetCtx.beginPath();
+    targetCtx.moveTo(0, -3);
+    targetCtx.lineTo(0, -14);
+    targetCtx.moveTo(0, -3);
+    targetCtx.lineTo(9, -3);
+    targetCtx.stroke();
+    targetCtx.fillStyle = character.pupil;
+    targetCtx.fillRect(-2, -5, 4, 4);
+    return;
+  }
   targetCtx.fillStyle = character.shadow;
   targetCtx.fillRect(-18, -15, 39, 31);
   targetCtx.fillStyle = character.body;

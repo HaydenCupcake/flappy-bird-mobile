@@ -11,7 +11,7 @@ Controls:
 - Tap or click anywhere on the game canvas to flap.
 - Pick Classic, Ruby, Midnight, or unlocked bonus birds from the bird selector before or between runs.
 - Reach 30 points to unlock the green-and-white Emerald Duck, which quacks whenever it flaps.
-- Tap Secret on the start screen and enter `ilove67` to unlock the hidden Six Seven bird for that game session.
+- Tap Secret on the start screen and enter `ilove67` to unlock the hidden Six Seven bird, or enter `Logan` to unlock the flying clock with wings for that game session.
 - Use the on-screen Flap button on touch devices.
 - Use the Sound On/Sound Off button to mute or enable generated music and effects.
 - Press `Space` or `ArrowUp` to flap.
@@ -22,7 +22,8 @@ Controls:
 - Responsive HTML5 canvas for phone portrait and desktop browsers.
 - Start screen, pause/resume, visibility auto-pause, game over, and restart flow.
 - Score display and best score saved with `localStorage`.
-- Five selectable bird characters with the current non-secret pick saved on this device, including a score-unlocked Emerald Duck at 30 points and a hidden Six Seven bird that requires the secret code again each time the game page starts.
+- Six selectable bird characters with the current non-secret pick saved on this device, including immediately playable birds, score-unlocked birds like Emerald Duck at 30 points, and secret code characters like Six Seven and Logan Clock that require their secret codes again each time the game page starts.
+- Selecting Logan Clock turns the white background clouds into round clock faces.
 - Browser-safe generated Web Audio: sound on by default, start-screen music attempts to play on load when browsers allow it, saved sound preference, separate start-screen and gameplay music loops, duck quacks, and effects for flaps, gates, selection, pause/resume, and game over.
 - Increasing speed and tighter gate spacing as your score rises.
 - Original pixel-art arcade visuals with no copyrighted Flappy Bird assets.
