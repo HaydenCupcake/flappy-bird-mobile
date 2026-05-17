@@ -9,7 +9,7 @@ Open `index.html` in a browser, or publish the repo with GitHub Pages.
 Controls:
 
 - Tap or click anywhere on the game canvas to flap.
-- Pick Classic, Ruby, Midnight, or unlocked bonus birds from the bird selector before or between runs.
+- Pick Classic, Ruby, Midnight, Sugar Star, or unlocked bonus birds from the bird selector before or between runs.
 - Reach 30 points to unlock the green-and-white Emerald Duck, which quacks whenever it flaps.
 - Tap Secret on the start screen and enter `ilove67` to unlock the hidden Six Seven bird, or enter `Logan` to unlock the flying clock with wings for that game session.
 - Use the on-screen Flap button on touch devices.
@@ -22,7 +22,7 @@ Controls:
 - Responsive HTML5 canvas for phone portrait and desktop browsers.
 - Start screen, pause/resume, visibility auto-pause, game over, and restart flow.
 - Score display and best score saved with `localStorage`.
-- Six selectable bird characters with the current non-secret pick saved on this device, including immediately playable birds, score-unlocked birds like Emerald Duck at 30 points, and secret code characters like Six Seven and Logan Clock that require their secret codes again each time the game page starts.
+- Seven selectable bird characters with the current non-secret pick saved on this device, including immediately playable birds like the white Sugar Star, score-unlocked birds like Emerald Duck at 30 points, and secret code characters like Six Seven and Logan Clock that require their secret codes again each time the game page starts.
 - Selecting Logan Clock turns the white background clouds into round clock faces.
 - Browser-safe generated Web Audio: sound on by default, start-screen music attempts to play on load when browsers allow it, saved sound preference, separate start-screen and gameplay music loops, duck quacks, and effects for flaps, gates, selection, pause/resume, and game over.
 - Increasing speed and tighter gate spacing as your score rises.

@@ -70,20 +70,19 @@ const CHARACTERS = [
     scoreBurst: '#22d3ee',
   },
   {
-    id: 'sixseven',
-    name: 'Six Seven',
-    locked: true,
-    badge: '67',
-    body: '#a855f7',
-    crest: '#facc15',
-    wing: '#22d3ee',
-    beak: '#fb7185',
-    beakShadow: '#e11d48',
+    id: 'sugar',
+    name: 'Sugar Star',
+    body: '#f8fafc',
+    crest: '#ffffff',
+    wing: '#ffffff',
+    beak: '#ffffff',
+    beakShadow: '#e2e8f0',
     eye: '#f8fafc',
-    pupil: '#111827',
-    shadow: '#020617',
-    trail: '#c084fc',
-    scoreBurst: '#facc15',
+    pupil: '#38bdf8',
+    shadow: '#cbd5e1',
+    trail: '#f8fafc',
+    scoreBurst: '#ffffff',
+    sparklyEyes: true,
   },
   {
     id: 'duck',
@@ -101,6 +100,22 @@ const CHARACTERS = [
     shadow: '#052e16',
     trail: '#86efac',
     scoreBurst: '#22c55e',
+  },
+  {
+    id: 'sixseven',
+    name: 'Six Seven',
+    locked: true,
+    badge: '67',
+    body: '#a855f7',
+    crest: '#facc15',
+    wing: '#22d3ee',
+    beak: '#fb7185',
+    beakShadow: '#e11d48',
+    eye: '#f8fafc',
+    pupil: '#111827',
+    shadow: '#020617',
+    trail: '#c084fc',
+    scoreBurst: '#facc15',
   },
   {
     id: 'clock',
@@ -772,6 +787,11 @@ function drawBirdSprite(targetCtx, character, wingY) {
   targetCtx.fillRect(2, -15, 10, 10);
   targetCtx.fillStyle = character.pupil;
   targetCtx.fillRect(7, -11, 4, 4);
+  if (character.sparklyEyes) {
+    targetCtx.fillStyle = '#f8fafc';
+    targetCtx.fillRect(4, -14, 2, 2);
+    targetCtx.fillRect(9, -9, 2, 2);
+  }
   targetCtx.fillStyle = character.wing;
   targetCtx.fillRect(-20, wingY, 19, 12);
   if (character.badge === '67') {

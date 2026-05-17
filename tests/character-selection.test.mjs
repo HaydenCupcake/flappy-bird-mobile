@@ -11,14 +11,16 @@ assert.match(html, /aria-label="Choose your bird character"/, 'character picker 
 assert.match(html, /data-character="classic"/, 'classic bird option should exist');
 assert.match(html, /data-character="ruby"/, 'ruby bird option should exist');
 assert.match(html, /data-character="midnight"/, 'midnight bird option should exist');
+assert.match(html, /data-character="sugar"/, 'Sugar Star bird option should exist');
 assert.match(html, /data-character="sixseven"/, 'secret 6/7 bird option should exist in locked state');
 assert.match(html, /data-character="clock"/, 'Logan secret clock option should exist in locked state');
 assert.match(html, /data-character="duck"/, '30-point duck option should exist in locked state');
+assert.match(html, /<span>Sugar Star<\/span>/, 'Sugar Star option should use the full Sugar Star name');
 assert.match(html, /<span>Duck<\/span>/, 'duck option should be labeled Duck');
 assert.match(html, /<span>Clock<\/span>/, 'clock option should be labeled Clock');
 assert.match(
   html,
-  /data-character="classic"[\s\S]*data-character="ruby"[\s\S]*data-character="midnight"[\s\S]*data-character="duck"[\s\S]*data-character="sixseven"[\s\S]*data-character="clock"/,
+  /data-character="classic"[\s\S]*data-character="ruby"[\s\S]*data-character="midnight"[\s\S]*data-character="sugar"[\s\S]*data-character="duck"[\s\S]*data-character="sixseven"[\s\S]*data-character="clock"/,
   'character menu should be sorted as immediately playable, score unlocks, then secret code unlocks'
 );
 assert.match(html, /id="selectedCharacterText"/, 'selected character label should exist');
@@ -36,6 +38,11 @@ assert.match(js, /id: 'sixseven'/, 'secret 6/7 character should be defined');
 assert.match(js, /name: 'Six Seven'/, 'secret character should be named for 6 and 7');
 assert.match(js, /id: 'duck'/, 'duck character should be defined');
 assert.match(js, /name: 'Emerald Duck'/, 'duck character should be named');
+assert.match(js, /id: 'sugar'/, 'Sugar Star character should be defined');
+assert.match(js, /name: 'Sugar Star'/, 'Sugar Star character should be named');
+assert.match(js, /id: 'sugar'[\s\S]*body: '#f8fafc'[\s\S]*crest: '#ffffff'[\s\S]*wing: '#ffffff'[\s\S]*beak: '#ffffff'[\s\S]*beakShadow: '#e2e8f0'/, 'Sugar Star should be a completely white bird');
+assert.match(js, /id: 'sugar'[\s\S]*sparklyEyes: true/, 'Sugar Star should have sparkly eyes');
+assert.doesNotMatch(js, /id: 'sugar'[\s\S]*?(locked: true|unlockScore|secretCode)[\s\S]*?name: 'Emerald Duck'/, 'Sugar Star should be immediately playable before score-locked characters');
 assert.match(js, /id: 'clock'/, 'clock character should be defined');
 assert.match(js, /name: 'Logan Clock'/, 'clock character should be named for its secret code');
 assert.match(js, /secretCode: 'logan'/, 'clock should unlock with the Logan secret code');
@@ -64,6 +71,7 @@ assert.match(js, /character\.badge === '67'/, 'bird sprite should draw a 67 badg
 assert.match(js, /character\.species === 'clock'/, 'clock sprite should draw clock-specific details');
 assert.match(js, /targetCtx\.arc\(0, -3, 18, 0, Math\.PI \* 2\)/, 'clock character should have a round clock face');
 assert.match(js, /targetCtx\.moveTo\(0, -3\);[\s\S]*targetCtx\.lineTo\(0, -14\);[\s\S]*targetCtx\.moveTo\(0, -3\);[\s\S]*targetCtx\.lineTo\(9, -3\)/, 'clock character should draw clock hands');
+assert.match(js, /if \(character\.sparklyEyes\) \{[\s\S]*targetCtx\.fillRect\(4, -14, 2, 2\);[\s\S]*targetCtx\.fillRect\(9, -9, 2, 2\);[\s\S]*\}/, 'sparkly-eyed characters should draw eye sparkle pixels');
 assert.match(js, /function drawClockCloud\(x, y, scale\)/, 'clock clouds should have a dedicated renderer');
 assert.match(js, /getSelectedCharacter\(\)\.species === 'clock' \? drawClockCloud\(x, y, 2 \+ \(i % 2\)\) : pixelCloud\(x, y, 2 \+ \(i % 2\)\)/, 'clock character should turn background clouds into round clocks');
 assert.match(js, /ctx\.arc\(x \+ radius, y \+ radius, radius, 0, Math\.PI \* 2\)/, 'clock clouds should be round clock faces');
