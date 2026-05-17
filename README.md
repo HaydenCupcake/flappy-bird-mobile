@@ -21,7 +21,7 @@ Controls:
 - Start screen, pause/resume, visibility auto-pause, game over, and restart flow.
 - Score display and best score saved with `localStorage`.
 - Three selectable bird characters with the current pick saved on this device.
-- Browser-safe generated Web Audio: muted by default, saved sound preference, looping in-game music, and effects for flaps, gates, selection, pause/resume, and game over.
+- Browser-safe generated Web Audio: muted by default, saved sound preference, separate start-screen and gameplay music loops, and effects for flaps, gates, selection, pause/resume, and game over.
 - Increasing speed and tighter gate spacing as your score rises.
 - Original pixel-art arcade visuals with no copyrighted Flappy Bird assets.
 - Accessible visible instructions and keyboard controls.

@@ -79,6 +79,7 @@ let audioContext = null;
 let masterGain = null;
 let musicTimer = 0;
 let musicStep = 0;
+let musicMode = '';
 let soundEnabled = localStorage.getItem(STORAGE_KEY_AUDIO) === 'true';
 let backgroundOscillators = [];
 
@@ -144,7 +145,8 @@ function toggleSound() {
   if (soundEnabled) {
     setupAudio();
     playResumeSound();
-    if (state === 'playing') startBackgroundMusic();
+    if (state === 'playing') startGameplayMusic();
+    else if (state === 'ready' || state === 'gameover') startStartScreenMusic();
   } else {
     stopBackgroundMusic();
     if (masterGain) masterGain.gain.setTargetAtTime(0, audioContext.currentTime, 0.015);
@@ -200,13 +202,15 @@ function playGameOverSound() {
   playTone(165, 0.22, 'sawtooth', 0.13, 0.12);
 }
 
-function startBackgroundMusic() {
-  if (state !== 'playing' || musicTimer || !setupAudio()) return;
+function startMusicMode(mode, allowedStates, melody, bass, interval) {
+  if (!allowedStates.includes(state) || document.hidden || !soundEnabled || !setupAudio()) return;
+  if (musicTimer && musicMode === mode) return;
+  stopBackgroundMusic();
+  musicMode = mode;
+  musicStep = 0;
 
-  const melody = [262, 330, 392, 523, 392, 330, 294, 349];
-  const bass = [131, 131, 196, 196, 147, 147, 175, 175];
   const playMusicStep = () => {
-    if (state !== 'playing' || document.hidden || !soundEnabled) {
+    if (!allowedStates.includes(state) || document.hidden || !soundEnabled || musicMode !== mode) {
       stopBackgroundMusic();
       return;
     }
@@ -221,7 +225,20 @@ function startBackgroundMusic() {
   };
 
   playMusicStep();
-  musicTimer = window.setInterval(playMusicStep, 230);
+  musicTimer = window.setInterval(playMusicStep, interval);
+}
+
+function startStartScreenMusic() {
+  startMusicMode('start-screen', ['ready', 'gameover'], [392, 494, 587, 659, 587, 494], [196, 247, 294, 247, 220, 247], 320);
+}
+
+function startGameplayMusic() {
+  startMusicMode('gameplay', ['playing'], [262, 330, 392, 523, 392, 330, 294, 349], [131, 131, 196, 196, 147, 147, 175, 175], 230);
+}
+
+function startBackgroundMusic() {
+  if (state === 'playing') startGameplayMusic();
+  else if (state === 'ready' || state === 'gameover') startStartScreenMusic();
 }
 
 function stopBackgroundMusic() {
@@ -237,6 +254,7 @@ function stopBackgroundMusic() {
     }
   });
   backgroundOscillators = [];
+  musicMode = '';
 }
 
 function drawCharacterPreviews() {
@@ -285,10 +303,11 @@ function setOverlay(visible, label = '', title = '', copy = '', button = '') {
 
 function startGame() {
   resetGame();
+  stopBackgroundMusic();
   state = 'playing';
   setOverlay(false);
   pauseButton.textContent = 'Pause';
-  startBackgroundMusic();
+  startGameplayMusic();
   flap();
 }
 
@@ -328,6 +347,7 @@ function endGame() {
     `Best score: ${bestScore}. Time each flap and slip through the moving skyline.`,
     'Restart'
   );
+  startStartScreenMusic();
   pauseButton.textContent = 'Pause';
   const character = getSelectedCharacter();
   burst(bird.x, bird.y, character.body, 16);
@@ -598,7 +618,9 @@ document.addEventListener('visibilitychange', () => {
     stopBackgroundMusic();
     if (state === 'playing') pauseGame(false);
   } else if (state === 'playing') {
-    startBackgroundMusic();
+    startGameplayMusic();
+  } else if (state === 'ready' || state === 'gameover') {
+    startStartScreenMusic();
   }
 });
 

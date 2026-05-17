@@ -20,6 +20,9 @@ assert.match(js, /createGain\(/, 'generated audio should use gain nodes');
 [
   'setupAudio',
   'toggleSound',
+  'startMusicMode',
+  'startStartScreenMusic',
+  'startGameplayMusic',
   'startBackgroundMusic',
   'stopBackgroundMusic',
   'playFlapSound',
@@ -34,5 +37,15 @@ assert.match(js, /createGain\(/, 'generated audio should use gain nodes');
 
 assert.match(js, /startBackgroundMusic\(\)/, 'music should be started by gameplay flow');
 assert.match(js, /stopBackgroundMusic\(\)/, 'music should be stopped by pause, game over, or visibility flow');
+assert.match(js, /musicMode = ''/, 'music mode should track the active background loop');
+assert.match(js, /startMusicMode\('start-screen', \['ready', 'gameover'\]/, 'start-screen music should be limited to ready and gameover states');
+assert.match(js, /startMusicMode\('gameplay', \['playing'\]/, 'gameplay music should be limited to playing state');
+assert.match(js, /if \(state === 'playing'\) startGameplayMusic\(\)/, 'background music dispatcher should choose gameplay music while playing');
+assert.match(js, /else if \(state === 'ready' \|\| state === 'gameover'\) startStartScreenMusic\(\)/, 'background music dispatcher should choose start-screen music outside gameplay');
+assert.notEqual(
+  js.match(/startMusicMode\('start-screen', \['ready', 'gameover'\], \[([^\]]+)\]/)?.[1],
+  js.match(/startMusicMode\('gameplay', \['playing'\], \[([^\]]+)\]/)?.[1],
+  'start-screen and gameplay music should use different generated melodies'
+);
 
 console.log('audio checks passed');
