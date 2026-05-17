@@ -34,5 +34,6 @@ assert.match(js, /function syncSecretCharacterLockState/, 'secret character shou
 assert.match(js, /function drawCharacterPreview/, 'character picker preview renderer should exist');
 assert.match(js, /function drawBirdSprite/, 'game bird should be drawn from selected character data');
 assert.match(js, /character\.badge === '67'/, 'bird sprite should draw a 67 badge for the secret character');
+assert.match(js, /font = '900 13px monospace'/, 'secret 67 badge digits should be slightly larger');
 
 console.log('character-selection checks passed');

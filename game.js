@@ -650,12 +650,12 @@ function drawBirdSprite(targetCtx, character, wingY) {
   targetCtx.fillRect(-20, wingY, 19, 12);
   if (character.badge === '67') {
     targetCtx.fillStyle = '#fef3c7';
-    targetCtx.fillRect(-11, -10, 18, 13);
+    targetCtx.fillRect(-13, -12, 22, 15);
     targetCtx.fillStyle = '#4c1d95';
-    targetCtx.font = '900 10px monospace';
+    targetCtx.font = '900 13px monospace';
     targetCtx.textAlign = 'center';
     targetCtx.textBaseline = 'middle';
-    targetCtx.fillText('67', -2, -3);
+    targetCtx.fillText('67', -2, -4);
   }
 }
 
