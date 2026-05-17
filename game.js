@@ -9,6 +9,7 @@ const stateCopy = document.getElementById('stateCopy');
 const primaryButton = document.getElementById('primaryButton');
 const flapButton = document.getElementById('flapButton');
 const pauseButton = document.getElementById('pauseButton');
+const soundButton = document.getElementById('soundButton');
 const selectedCharacterText = document.getElementById('selectedCharacterText');
 const characterButtons = [...document.querySelectorAll('[data-character]')];
 const previewCanvases = [...document.querySelectorAll('[data-preview]')];
@@ -17,6 +18,7 @@ const WIDTH = 432;
 const HEIGHT = 768;
 const STORAGE_KEY = 'sky-hopper-best-score';
 const STORAGE_KEY_CHARACTER = 'sky-hopper-character';
+const STORAGE_KEY_AUDIO = 'sky-hopper-audio-enabled';
 const groundHeight = 96;
 
 const CHARACTERS = [
@@ -73,6 +75,12 @@ let spawnTimer = 0;
 let animationFrame = 0;
 let difficulty = 0;
 let groundOffset = 0;
+let audioContext = null;
+let masterGain = null;
+let musicTimer = 0;
+let musicStep = 0;
+let soundEnabled = localStorage.getItem(STORAGE_KEY_AUDIO) === 'true';
+let backgroundOscillators = [];
 
 const bird = {
   x: 112,
@@ -91,7 +99,7 @@ function getSelectedCharacter() {
   return CHARACTERS.find((character) => character.id === selectedCharacterId) || CHARACTERS[0];
 }
 
-function selectCharacter(characterId) {
+function selectCharacter(characterId, playSound = true) {
   const character = CHARACTERS.find((entry) => entry.id === characterId) || CHARACTERS[0];
   selectedCharacterId = character.id;
   localStorage.setItem(STORAGE_KEY_CHARACTER, character.id);
@@ -104,6 +112,131 @@ function selectCharacter(characterId) {
   });
 
   drawCharacterPreviews();
+  if (playSound) playCharacterSelectSound();
+}
+
+function setupAudio() {
+  if (!soundEnabled) return null;
+  if (!audioContext) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return null;
+    audioContext = new AudioContextClass();
+    masterGain = audioContext.createGain();
+    masterGain.gain.value = 0.42;
+    masterGain.connect(audioContext.destination);
+  }
+  if (audioContext.state === 'suspended') audioContext.resume();
+  if (masterGain) masterGain.gain.setTargetAtTime(0.42, audioContext.currentTime, 0.015);
+  return audioContext;
+}
+
+function updateSoundButton() {
+  soundButton.textContent = soundEnabled ? 'Sound On' : 'Sound Off';
+  soundButton.setAttribute('aria-label', soundEnabled ? 'Mute sound' : 'Enable sound');
+  soundButton.setAttribute('aria-pressed', String(soundEnabled));
+}
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  localStorage.setItem(STORAGE_KEY_AUDIO, String(soundEnabled));
+  updateSoundButton();
+
+  if (soundEnabled) {
+    setupAudio();
+    playResumeSound();
+    if (state === 'playing') startBackgroundMusic();
+  } else {
+    stopBackgroundMusic();
+    if (masterGain) masterGain.gain.setTargetAtTime(0, audioContext.currentTime, 0.015);
+  }
+}
+
+function playTone(frequency, duration, type = 'square', volume = 0.18, delay = 0) {
+  const audio = setupAudio();
+  if (!audio || !masterGain) return null;
+
+  const start = audio.currentTime + delay;
+  const oscillator = audio.createOscillator();
+  const gain = audio.createGain();
+  oscillator.type = type;
+  oscillator.frequency.setValueAtTime(frequency, start);
+  gain.gain.setValueAtTime(0.0001, start);
+  gain.gain.exponentialRampToValueAtTime(volume, start + 0.015);
+  gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+  oscillator.connect(gain);
+  gain.connect(masterGain);
+  oscillator.start(start);
+  oscillator.stop(start + duration + 0.02);
+  return oscillator;
+}
+
+function playFlapSound() {
+  const tone = playTone(620, 0.08, 'square', 0.14);
+  if (tone && audioContext) tone.frequency.exponentialRampToValueAtTime(920, audioContext.currentTime + 0.08);
+}
+
+function playScoreSound() {
+  playTone(784, 0.08, 'triangle', 0.16);
+  playTone(1175, 0.1, 'triangle', 0.14, 0.07);
+}
+
+function playCharacterSelectSound() {
+  playTone(520, 0.05, 'triangle', 0.1);
+  playTone(660, 0.07, 'triangle', 0.09, 0.045);
+}
+
+function playPauseSound() {
+  playTone(440, 0.08, 'sine', 0.12);
+  playTone(330, 0.11, 'sine', 0.1, 0.055);
+}
+
+function playResumeSound() {
+  playTone(330, 0.07, 'sine', 0.1);
+  playTone(495, 0.1, 'sine', 0.12, 0.055);
+}
+
+function playGameOverSound() {
+  playTone(220, 0.16, 'sawtooth', 0.15);
+  playTone(165, 0.22, 'sawtooth', 0.13, 0.12);
+}
+
+function startBackgroundMusic() {
+  if (state !== 'playing' || musicTimer || !setupAudio()) return;
+
+  const melody = [262, 330, 392, 523, 392, 330, 294, 349];
+  const bass = [131, 131, 196, 196, 147, 147, 175, 175];
+  const playMusicStep = () => {
+    if (state !== 'playing' || document.hidden || !soundEnabled) {
+      stopBackgroundMusic();
+      return;
+    }
+
+    backgroundOscillators = backgroundOscillators.filter((oscillator) => oscillator.context.currentTime < oscillator.stopTime);
+    const melodyOscillator = playTone(melody[musicStep % melody.length], 0.16, 'triangle', 0.045);
+    const bassOscillator = playTone(bass[musicStep % bass.length], 0.18, 'sine', 0.032);
+    if (melodyOscillator) melodyOscillator.stopTime = audioContext.currentTime + 0.18;
+    if (bassOscillator) bassOscillator.stopTime = audioContext.currentTime + 0.2;
+    backgroundOscillators.push(...[melodyOscillator, bassOscillator].filter(Boolean));
+    musicStep += 1;
+  };
+
+  playMusicStep();
+  musicTimer = window.setInterval(playMusicStep, 230);
+}
+
+function stopBackgroundMusic() {
+  if (musicTimer) {
+    window.clearInterval(musicTimer);
+    musicTimer = 0;
+  }
+  backgroundOscillators.forEach((oscillator) => {
+    try {
+      oscillator.stop();
+    } catch (error) {
+      // The oscillator may already have reached its scheduled stop time.
+    }
+  });
+  backgroundOscillators = [];
 }
 
 function drawCharacterPreviews() {
@@ -155,12 +288,15 @@ function startGame() {
   state = 'playing';
   setOverlay(false);
   pauseButton.textContent = 'Pause';
+  startBackgroundMusic();
   flap();
 }
 
-function pauseGame() {
+function pauseGame(playSound = true) {
   if (state !== 'playing') return;
   state = 'paused';
+  stopBackgroundMusic();
+  if (playSound) playPauseSound();
   setOverlay(true, 'Paused', 'Catch Your Breath', 'Tap resume when you are ready to dodge more gates.', 'Resume');
   pauseButton.textContent = 'Resume';
 }
@@ -171,11 +307,15 @@ function resumeGame() {
   lastTime = performance.now();
   setOverlay(false);
   pauseButton.textContent = 'Pause';
+  playResumeSound();
+  startBackgroundMusic();
 }
 
 function endGame() {
   if (state === 'gameover') return;
   state = 'gameover';
+  stopBackgroundMusic();
+  playGameOverSound();
   if (score > bestScore) {
     bestScore = score;
     localStorage.setItem(STORAGE_KEY, String(bestScore));
@@ -203,6 +343,7 @@ function flap() {
     return;
   }
   bird.velocity = -435;
+  playFlapSound();
   const character = getSelectedCharacter();
   burst(bird.x - 12, bird.y + 18, character.trail, 5);
 }
@@ -264,6 +405,7 @@ function update(dt) {
       pipe.passed = true;
       score += 1;
       updateScore();
+      playScoreSound();
       const character = getSelectedCharacter();
       burst(bird.x, bird.y, character.scoreBurst, 8);
     }
@@ -442,6 +584,7 @@ primaryButton.addEventListener('click', () => {
 });
 flapButton.addEventListener('click', flap);
 pauseButton.addEventListener('click', togglePause);
+soundButton.addEventListener('click', toggleSound);
 characterButtons.forEach((button) => {
   button.addEventListener('click', () => selectCharacter(button.dataset.character));
 });
@@ -451,12 +594,21 @@ document.addEventListener('pointerdown', (event) => {
 });
 window.addEventListener('keydown', handleKey);
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden && state === 'playing') pauseGame();
+  if (document.hidden) {
+    stopBackgroundMusic();
+    if (state === 'playing') pauseGame(false);
+  } else if (state === 'playing') {
+    startBackgroundMusic();
+  }
 });
 
-selectCharacter(selectedCharacterId);
+updateSoundButton();
+selectCharacter(selectedCharacterId, false);
 setOverlay(true, 'Ready', 'Flap Through Neon Gates', 'Avoid the towers, collect points, and keep your tiny rocket bird airborne.', 'Start Game');
 draw();
 animationFrame = requestAnimationFrame(loop);
 
-window.addEventListener('pagehide', () => cancelAnimationFrame(animationFrame));
+window.addEventListener('pagehide', () => {
+  stopBackgroundMusic();
+  cancelAnimationFrame(animationFrame);
+});

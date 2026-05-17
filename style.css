@@ -308,6 +308,16 @@ button:focus-visible {
   }
 }
 
+@media (max-width: 420px) {
+  .controls {
+    flex-wrap: wrap;
+  }
+
+  .secondary-button {
+    flex: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
