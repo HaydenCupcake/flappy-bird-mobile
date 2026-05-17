@@ -25,8 +25,10 @@ assert.match(css, /\.character-option\.locked/, 'locked secret character styling
 assert.match(js, /const CHARACTERS = \[/, 'character definitions should exist');
 assert.match(js, /id: 'sixseven'/, 'secret 6/7 character should be defined');
 assert.match(js, /name: 'Six Seven'/, 'secret character should be named for 6 and 7');
-assert.match(js, /STORAGE_KEY_CHARACTER/, 'selected character should be persisted');
-assert.match(js, /STORAGE_KEY_SECRET_CHARACTER/, 'secret unlock should be persisted');
+assert.match(js, /STORAGE_KEY_CHARACTER/, 'selected non-secret character should be persisted');
+assert.doesNotMatch(js, /STORAGE_KEY_SECRET_CHARACTER/, 'secret unlock should reset each time the game page starts');
+assert.doesNotMatch(js, /localStorage\.setItem\([^)]*SECRET/i, 'secret unlock should not be saved to localStorage');
+assert.match(js, /let secretCharacterUnlocked = false;/, 'secret character should start locked for each page session');
 assert.match(js, /SECRET_UNLOCK_CODE = 'ilove67'/, 'secret unlock code should be ilove67');
 assert.match(js, /function selectCharacter/, 'character selection handler should exist');
 assert.match(js, /function unlockSecretCharacter/, 'secret character unlock handler should exist');

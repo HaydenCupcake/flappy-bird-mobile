@@ -23,7 +23,6 @@ const HEIGHT = 768;
 const STORAGE_KEY = 'sky-hopper-best-score';
 const STORAGE_KEY_CHARACTER = 'sky-hopper-character';
 const STORAGE_KEY_AUDIO = 'sky-hopper-audio-enabled';
-const STORAGE_KEY_SECRET_CHARACTER = 'sky-hopper-secret-sixseven-unlocked';
 const SECRET_UNLOCK_CODE = 'ilove67';
 const groundHeight = 96;
 
@@ -90,7 +89,7 @@ const CHARACTERS = [
 
 let bestScore = Number(localStorage.getItem(STORAGE_KEY) || 0);
 let selectedCharacterId = localStorage.getItem(STORAGE_KEY_CHARACTER) || CHARACTERS[0].id;
-let secretCharacterUnlocked = localStorage.getItem(STORAGE_KEY_SECRET_CHARACTER) === 'true';
+let secretCharacterUnlocked = false;
 let state = 'ready';
 let score = 0;
 let lastTime = 0;
@@ -149,8 +148,7 @@ function unlockSecretCharacter() {
   }
 
   secretCharacterUnlocked = true;
-  localStorage.setItem(STORAGE_KEY_SECRET_CHARACTER, 'true');
-  secretMessage.textContent = 'Unlocked Six Seven! The 6/7 bird is now playable.';
+  secretMessage.textContent = 'Unlocked Six Seven for this game session! Enter the code again next time the game page starts.';
   secretButton.textContent = 'Unlocked';
   secretButton.setAttribute('aria-expanded', 'true');
   syncSecretCharacterLockState();
@@ -743,10 +741,6 @@ document.addEventListener('visibilitychange', () => {
 
 updateSoundButton();
 syncSecretCharacterLockState();
-if (secretCharacterUnlocked) {
-  secretButton.textContent = 'Unlocked';
-  secretMessage.textContent = 'Six Seven is unlocked and ready to fly.';
-}
 if (!isCharacterUnlocked(CHARACTERS.find((entry) => entry.id === selectedCharacterId))) {
   selectedCharacterId = CHARACTERS[0].id;
 }

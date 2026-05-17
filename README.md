@@ -10,7 +10,7 @@ Controls:
 
 - Tap or click anywhere on the game canvas to flap.
 - Pick Classic, Ruby, or Midnight from the bird selector before or between runs.
-- Tap Secret on the start screen and enter `ilove67` to unlock the hidden Six Seven bird.
+- Tap Secret on the start screen and enter `ilove67` to unlock the hidden Six Seven bird for that game session.
 - Use the on-screen Flap button on touch devices.
 - Use the Sound On/Sound Off button to mute or enable generated music and effects.
 - Press `Space` or `ArrowUp` to flap.
@@ -21,7 +21,7 @@ Controls:
 - Responsive HTML5 canvas for phone portrait and desktop browsers.
 - Start screen, pause/resume, visibility auto-pause, game over, and restart flow.
 - Score display and best score saved with `localStorage`.
-- Four selectable bird characters with the current pick saved on this device, including a hidden Six Seven bird unlocked with the secret code.
+- Four selectable bird characters with the current non-secret pick saved on this device, plus a hidden Six Seven bird that requires the secret code again each time the game page starts.
 - Browser-safe generated Web Audio: sound on by default, start-screen music attempts to play on load when browsers allow it, saved sound preference, separate start-screen and gameplay music loops, and effects for flaps, gates, selection, pause/resume, and game over.
 - Increasing speed and tighter gate spacing as your score rises.
 - Original pixel-art arcade visuals with no copyrighted Flappy Bird assets.
