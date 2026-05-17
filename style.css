@@ -43,9 +43,11 @@ body {
 .game-shell {
   display: grid;
   gap: 12px;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
   height: min(100%, 100dvh);
   max-height: 100dvh;
   max-width: 560px;
+  min-height: 0;
   width: min(100%, 560px);
 }
 
@@ -107,8 +109,10 @@ h1 {
   background: #0f172a;
   border: 4px solid #020617;
   box-shadow: 0 22px 60px var(--shadow), 0 0 0 3px rgba(250, 204, 21, 0.28);
-  max-height: min(72svh, calc(100dvh - 236px), 820px);
-  max-width: min(100%, 100vw, calc((100dvh - 236px) * 9 / 16), 560px);
+  height: 100%;
+  max-height: min(100%, 100dvh, 820px);
+  max-width: min(100%, 100vw, calc(100dvh * 9 / 16), 560px);
+  min-height: 0;
   overflow: hidden;
   position: relative;
   width: 100%;
@@ -140,7 +144,9 @@ canvas {
   background: rgba(15, 23, 42, 0.92);
   border: 3px solid var(--accent);
   box-shadow: 8px 8px 0 rgba(2, 6, 23, 0.8);
+  max-height: calc(100% - 24px);
   max-width: 360px;
+  overflow: auto;
   padding: 18px;
 }
 
@@ -351,9 +357,14 @@ button:focus-visible {
 }
 
 .screen-reader-note {
-  background: rgba(15, 23, 42, 0.72);
-  border: 1px solid var(--panel-border);
-  padding: 10px 12px;
+  margin: -1px;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  padding: 0;
+  white-space: nowrap;
 }
 
 @media (min-width: 760px) {
@@ -368,8 +379,7 @@ button:focus-visible {
 
   .top-panel,
   .canvas-wrap,
-  .character-picker,
-  .screen-reader-note {
+  .character-picker {
     grid-column: 1;
   }
 
@@ -405,7 +415,6 @@ button:focus-visible {
 
   .game-shell {
     gap: 8px;
-    grid-template-rows: auto minmax(0, 1fr) auto auto auto;
   }
 
   .top-panel,
@@ -417,8 +426,83 @@ button:focus-visible {
   .canvas-wrap {
     align-self: center;
     justify-self: center;
-    max-height: min(56svh, calc(100dvh - 252px));
-    max-width: min(100%, 100vw, calc((100dvh - 252px) * 9 / 16));
+    max-height: min(100%, 100dvh);
+    max-width: min(100%, 100vw, calc(100dvh * 9 / 16));
+  }
+
+  .subtitle,
+  .help {
+    font-size: 0.68rem;
+    line-height: 1.25;
+  }
+
+  h1 {
+    font-size: clamp(1.05rem, 5vw, 1.45rem);
+  }
+
+  h2 {
+    font-size: clamp(1rem, 5vw, 1.35rem);
+  }
+
+  #stateCopy {
+    font-size: 0.78rem;
+    line-height: 1.3;
+  }
+
+  #primaryButton,
+  .secret-button {
+    margin-bottom: 6px;
+    padding: 8px 10px;
+  }
+
+  #primaryButton {
+    margin-top: 10px;
+  }
+
+  .panel {
+    max-height: calc(100% - 16px);
+    overflow: auto;
+    padding: 12px;
+  }
+
+  .character-picker {
+    gap: 6px;
+  }
+
+  .character-options {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .character-options::-webkit-scrollbar {
+    display: none;
+  }
+
+  .character-option {
+    flex: 0 0 auto;
+    min-width: 64px;
+    min-height: 58px;
+    padding: 4px;
+  }
+
+  .character-option canvas {
+    height: 30px;
+    width: 40px;
+  }
+
+  .flap-button,
+  .secondary-button {
+    min-height: 44px;
+  }
+
+  .flap-button {
+    font-size: 1rem;
+  }
+
+  .secondary-button {
+    padding: 0 10px;
   }
 }
 
