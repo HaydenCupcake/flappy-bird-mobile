@@ -15,8 +15,9 @@ assert.match(
 
 assert.match(css, /html,\s*body \{[\s\S]*overscroll-behavior: none;/, 'page should suppress browser rubber-band overscroll');
 assert.match(css, /html,\s*body \{[\s\S]*touch-action: none;/, 'page should disable browser touch gestures globally');
-assert.match(css, /body \{[\s\S]*height: 100dvh;[\s\S]*overflow: hidden;/, 'body should lock to the dynamic viewport and avoid page scrolling');
-assert.match(css, /\.game-shell \{[\s\S]*height: min\(100%, 100dvh\);[\s\S]*max-height: 100dvh;/, 'game shell should fit inside the visible dynamic viewport');
+assert.match(css, /body \{[\s\S]*overflow: hidden;/, 'body should avoid page scrolling');
+assert.match(css, /\.app-viewport \{[\s\S]*position: fixed;[\s\S]*inset: 0;[\s\S]*height: 100dvh;[\s\S]*overflow: hidden;/, 'fixed app viewport should lock to the dynamic viewport and avoid page scrolling');
+assert.match(css, /\.game-shell \{[\s\S]*height: 100%;[\s\S]*max-height: 100%;/, 'game shell should fit inside the visible dynamic viewport wrapper');
 assert.match(css, /\.canvas-wrap \{[\s\S]*max-height: min\([^;]*100dvh[^;]*\);[\s\S]*max-width: min\([^;]*100vw[^;]*\);/, 'canvas wrapper should cap itself with dynamic viewport units');
 assert.match(css, /@media \(max-width: 759px\), \(max-height: 820px\)/, 'compact screens should use a dedicated fit rule');
 assert.match(css, /\.controls \{[\s\S]*touch-action: manipulation;/, 'buttons may keep low-latency tap behavior without enabling page zoom');
