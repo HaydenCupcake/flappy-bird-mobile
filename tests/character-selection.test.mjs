@@ -20,7 +20,7 @@ assert.match(html, /<span>Duck<\/span>/, 'duck option should be labeled Duck');
 assert.match(html, /<span>Clock<\/span>/, 'clock option should be labeled Clock');
 assert.match(
   html,
-  /data-character="classic"[\s\S]*data-character="ruby"[\s\S]*data-character="midnight"[\s\S]*data-character="sugar"[\s\S]*data-character="duck"[\s\S]*data-character="sixseven"[\s\S]*data-character="clock"/,
+  /data-character="classic"[\s\S]*data-character="ruby"[\s\S]*data-character="midnight"[\s\S]*data-character="duck"[\s\S]*data-character="sixseven"[\s\S]*data-character="clock"[\s\S]*data-character="sugar"/,
   'character menu should be sorted as immediately playable, score unlocks, then secret code unlocks'
 );
 assert.match(html, /id="selectedCharacterText"/, 'selected character label should exist');
@@ -40,9 +40,13 @@ assert.match(js, /id: 'duck'/, 'duck character should be defined');
 assert.match(js, /name: 'Emerald Duck'/, 'duck character should be named');
 assert.match(js, /id: 'sugar'/, 'Sugar Star character should be defined');
 assert.match(js, /name: 'Sugar Star'/, 'Sugar Star character should be named');
-assert.match(js, /id: 'sugar'[\s\S]*body: '#f8fafc'[\s\S]*crest: '#ffffff'[\s\S]*wing: '#ffffff'[\s\S]*beak: '#ffffff'[\s\S]*beakShadow: '#e2e8f0'/, 'Sugar Star should be a completely white bird');
+assert.match(js, /id: 'sugar'[\s\S]*locked: true[\s\S]*secretCode: 'queenlia'/, 'Sugar Star should be locked behind the Queen Lia secret code');
+assert.match(js, /id: 'sugar'[\s\S]*species: 'sugar'[\s\S]*body: '#ffffff'[\s\S]*crest: '#f8fafc'[\s\S]*wing: '#e2e8f0'[\s\S]*beak: '#ffffff'[\s\S]*beakShadow: '#94a3b8'[\s\S]*eye: '#ffffff'[\s\S]*pupil: '#0f172a'[\s\S]*shadow: '#64748b'/, 'Sugar Star should be unmistakably white/silver with visible contrast');
 assert.match(js, /id: 'sugar'[\s\S]*sparklyEyes: true/, 'Sugar Star should have sparkly eyes');
-assert.doesNotMatch(js, /id: 'sugar'[\s\S]*?(locked: true|unlockScore|secretCode)[\s\S]*?name: 'Emerald Duck'/, 'Sugar Star should be immediately playable before score-locked characters');
+assert.match(js, /character\.species === 'sugar'/, 'Sugar Star should use a dedicated sprite branch instead of falling through to classic bird drawing');
+assert.match(js, /drawSugarStarSprite\(targetCtx, character, wingY\)/, 'Sugar Star should use a dedicated high-contrast white sprite renderer');
+assert.doesNotMatch(js, /id: 'sugar'[\s\S]*?(#facc15|#fde047|#eab308|#fb923c|#f97316)[\s\S]*?sparklyEyes: true/, 'Sugar Star must not reuse Classic Yellow palette colors');
+assert.match(js, /id: 'clock'[\s\S]*id: 'sugar'/, 'Sugar Star should be grouped after existing secret-code characters');
 assert.match(js, /id: 'clock'/, 'clock character should be defined');
 assert.match(js, /name: 'Logan Clock'/, 'clock character should be named for its secret code');
 assert.match(js, /secretCode: 'logan'/, 'clock should unlock with the Logan secret code');
@@ -56,12 +60,14 @@ assert.doesNotMatch(js, /STORAGE_KEY_SECRET_CHARACTER/, 'secret unlock should re
 assert.doesNotMatch(js, /localStorage\.setItem\([^)]*SECRET/i, 'secret unlock should not be saved to localStorage');
 assert.match(js, /let secretCharacterUnlocked = false;/, 'secret character should start locked for each page session');
 assert.match(js, /let clockCharacterUnlocked = false;/, 'clock secret character should start locked for each page session');
+assert.match(js, /let sugarCharacterUnlocked = false;/, 'Sugar Star should start locked for each page session');
 assert.match(js, /SECRET_UNLOCK_CODE = 'ilove67'/, 'secret unlock code should be ilove67');
 assert.match(js, /function selectCharacter/, 'character selection handler should exist');
 assert.match(js, /Enter the secret code to unlock this character\./, 'locked secret character click should show the requested unlock message');
 assert.match(js, /function unlockSecretCharacter/, 'secret character unlock handler should exist');
 assert.match(js, /enteredCode === 'logan'[\s\S]*clockCharacterUnlocked = true;[\s\S]*selectCharacter\('clock'\)/, 'Logan code should unlock and select the clock character');
 assert.match(js, /enteredCode === SECRET_UNLOCK_CODE[\s\S]*secretCharacterUnlocked = true;[\s\S]*selectCharacter\('sixseven'\)/, 'ilove67 code should still unlock and select Six Seven');
+assert.match(js, /enteredCode\.replace\(\/\\s\+\/g, ''\) === 'queenlia'[\s\S]*sugarCharacterUnlocked = true;[\s\S]*selectCharacter\('sugar'\)/, 'Queen Lia or QueenLia should unlock and select Sugar Star');
 assert.match(js, /function syncSecretCharacterLockState/, 'secret character should stay locked until code entry');
 assert.match(js, /character\.unlockScore <= Math\.max\(score, bestScore\)/, 'score-locked characters should unlock at their score threshold');
 assert.match(js, /score \+= 1;[\s\S]*syncSecretCharacterLockState\(\)/, 'character locks should refresh when scoring points');

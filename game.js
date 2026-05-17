@@ -70,21 +70,6 @@ const CHARACTERS = [
     scoreBurst: '#22d3ee',
   },
   {
-    id: 'sugar',
-    name: 'Sugar Star',
-    body: '#f8fafc',
-    crest: '#ffffff',
-    wing: '#ffffff',
-    beak: '#ffffff',
-    beakShadow: '#e2e8f0',
-    eye: '#f8fafc',
-    pupil: '#38bdf8',
-    shadow: '#cbd5e1',
-    trail: '#f8fafc',
-    scoreBurst: '#ffffff',
-    sparklyEyes: true,
-  },
-  {
     id: 'duck',
     name: 'Emerald Duck',
     locked: true,
@@ -134,12 +119,31 @@ const CHARACTERS = [
     trail: '#e0f2fe',
     scoreBurst: '#f8fafc',
   },
+  {
+    id: 'sugar',
+    name: 'Sugar Star',
+    locked: true,
+    secretCode: 'queenlia',
+    species: 'sugar',
+    body: '#ffffff',
+    crest: '#f8fafc',
+    wing: '#e2e8f0',
+    beak: '#ffffff',
+    beakShadow: '#94a3b8',
+    eye: '#ffffff',
+    pupil: '#0f172a',
+    shadow: '#64748b',
+    trail: '#f8fafc',
+    scoreBurst: '#ffffff',
+    sparklyEyes: true,
+  },
 ];
 
 let bestScore = Number(localStorage.getItem(STORAGE_KEY) || 0);
 let selectedCharacterId = localStorage.getItem(STORAGE_KEY_CHARACTER) || CHARACTERS[0].id;
 let secretCharacterUnlocked = false;
 let clockCharacterUnlocked = false;
+let sugarCharacterUnlocked = false;
 let state = 'ready';
 let score = 0;
 let lastTime = 0;
@@ -155,6 +159,7 @@ let musicMode = '';
 let soundEnabled = localStorage.getItem(STORAGE_KEY_AUDIO) !== 'false';
 let backgroundOscillators = [];
 let audioUnlockInstalled = false;
+let lastTouchEnd = 0;
 
 const bird = {
   x: 112,
@@ -173,7 +178,9 @@ function isCharacterUnlocked(character) {
   if (!character) return false;
   if (character.unlockScore) return character.unlockScore <= Math.max(score, bestScore);
   if (character.id === 'clock') return clockCharacterUnlocked;
-  return !character.locked || secretCharacterUnlocked;
+  if (character.id === 'sugar') return sugarCharacterUnlocked;
+  if (character.id === 'sixseven') return secretCharacterUnlocked;
+  return !character.locked;
 }
 
 function getSelectedCharacter() {
@@ -195,6 +202,16 @@ function syncSecretCharacterLockState() {
 
 function unlockSecretCharacter() {
   const enteredCode = secretCodeInput.value.trim().toLowerCase();
+  if (enteredCode.replace(/\s+/g, '') === 'queenlia') {
+    sugarCharacterUnlocked = true;
+    playSecretUnlockSound();
+    secretMessage.textContent = 'Unlocked Sugar Star for this game session! Enter Queen Lia again next time the game page starts.';
+    secretButton.textContent = 'Unlocked';
+    secretButton.setAttribute('aria-expanded', 'true');
+    syncSecretCharacterLockState();
+    selectCharacter('sugar');
+    return;
+  }
   if (enteredCode === 'logan') {
     clockCharacterUnlocked = true;
     playSecretUnlockSound();
@@ -764,6 +781,10 @@ function drawBirdSprite(targetCtx, character, wingY) {
     targetCtx.fillRect(-2, -5, 4, 4);
     return;
   }
+  if (character.species === 'sugar') {
+    drawSugarStarSprite(targetCtx, character, wingY);
+    return;
+  }
   targetCtx.fillStyle = character.shadow;
   targetCtx.fillRect(-18, -15, 39, 31);
   targetCtx.fillStyle = character.body;
@@ -803,6 +824,34 @@ function drawBirdSprite(targetCtx, character, wingY) {
     targetCtx.textBaseline = 'middle';
     targetCtx.fillText('67', -2, -5);
   }
+}
+
+function drawSugarStarSprite(targetCtx, character, wingY) {
+  targetCtx.fillStyle = character.shadow;
+  targetCtx.fillRect(-21, -18, 42, 34);
+  targetCtx.fillStyle = character.body;
+  targetCtx.fillRect(-20, -20, 38, 32);
+  targetCtx.fillStyle = character.crest;
+  targetCtx.fillRect(-15, -28, 28, 12);
+  targetCtx.fillRect(-8, -34, 14, 8);
+  targetCtx.fillStyle = character.beakShadow;
+  targetCtx.fillRect(18, 1, 16, 9);
+  targetCtx.fillStyle = character.beak;
+  targetCtx.fillRect(10, -7, 24, 10);
+  targetCtx.fillStyle = character.eye;
+  targetCtx.fillRect(1, -17, 12, 12);
+  targetCtx.strokeStyle = character.shadow;
+  targetCtx.lineWidth = 2;
+  targetCtx.strokeRect(1, -17, 12, 12);
+  targetCtx.fillStyle = character.pupil;
+  targetCtx.fillRect(7, -12, 4, 4);
+  targetCtx.fillStyle = '#f8fafc';
+  targetCtx.fillRect(4, -14, 2, 2);
+  targetCtx.fillRect(9, -9, 2, 2);
+  targetCtx.fillStyle = character.wing;
+  targetCtx.fillRect(-22, wingY - 1, 21, 13);
+  targetCtx.fillStyle = character.shadow;
+  targetCtx.fillRect(-22, wingY + 10, 21, 3);
 }
 
 function drawParticles() {
@@ -851,6 +900,22 @@ function handleKey(event) {
   }
 }
 
+function preventGestureZoom(event) {
+  if (event.touches && event.touches.length > 1) {
+    event.preventDefault();
+  }
+  if (event.scale && event.scale !== 1) {
+    event.preventDefault();
+  }
+}
+
+function preventDoubleTapZoom(event) {
+  if (Date.now() - lastTouchEnd <= 300) {
+    event.preventDefault();
+  }
+  lastTouchEnd = Date.now();
+}
+
 primaryButton.addEventListener('click', () => {
   if (state === 'paused') resumeGame();
   else startGame();
@@ -875,6 +940,9 @@ document.addEventListener('pointerdown', (event) => {
   if (event.target.closest('button')) return;
   flap();
 });
+document.addEventListener('touchstart', preventGestureZoom, { passive: false });
+document.addEventListener('touchend', preventDoubleTapZoom, { passive: false });
+document.addEventListener('gesturestart', preventGestureZoom, { passive: false });
 window.addEventListener('keydown', handleKey);
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {

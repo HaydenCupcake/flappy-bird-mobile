@@ -16,8 +16,11 @@
 
 html,
 body {
+  height: 100%;
   min-height: 100%;
   margin: 0;
+  overscroll-behavior: none;
+  touch-action: none;
 }
 
 body {
@@ -29,16 +32,19 @@ body {
   color: var(--ink);
   display: flex;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  height: 100dvh;
   justify-content: center;
   min-height: 100svh;
+  overflow: hidden;
   overflow-x: hidden;
   padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
-  touch-action: manipulation;
 }
 
 .game-shell {
   display: grid;
   gap: 12px;
+  height: min(100%, 100dvh);
+  max-height: 100dvh;
   max-width: 560px;
   width: min(100%, 560px);
 }
@@ -101,7 +107,8 @@ h1 {
   background: #0f172a;
   border: 4px solid #020617;
   box-shadow: 0 22px 60px var(--shadow), 0 0 0 3px rgba(250, 204, 21, 0.28);
-  max-height: min(72svh, 820px);
+  max-height: min(72svh, calc(100dvh - 236px), 820px);
+  max-width: min(100%, 100vw, calc((100dvh - 236px) * 9 / 16), 560px);
   overflow: hidden;
   position: relative;
   width: 100%;
@@ -317,6 +324,7 @@ button {
 .controls {
   gap: 10px;
   padding: 10px;
+  touch-action: manipulation;
 }
 
 .flap-button {
@@ -387,6 +395,30 @@ button:focus-visible {
 
   .secondary-button {
     flex: 1;
+  }
+}
+
+@media (max-width: 759px), (max-height: 820px) {
+  body {
+    padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+  }
+
+  .game-shell {
+    gap: 8px;
+    grid-template-rows: auto minmax(0, 1fr) auto auto auto;
+  }
+
+  .top-panel,
+  .character-picker,
+  .controls {
+    padding: 8px;
+  }
+
+  .canvas-wrap {
+    align-self: center;
+    justify-self: center;
+    max-height: min(56svh, calc(100dvh - 252px));
+    max-width: min(100%, 100vw, calc((100dvh - 252px) * 9 / 16));
   }
 }
 
