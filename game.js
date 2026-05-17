@@ -85,6 +85,23 @@ const CHARACTERS = [
     trail: '#c084fc',
     scoreBurst: '#facc15',
   },
+  {
+    id: 'duck',
+    name: 'Emerald Duck',
+    locked: true,
+    unlockScore: 30,
+    species: 'duck',
+    body: '#16a34a',
+    crest: '#f8fafc',
+    wing: '#bbf7d0',
+    beak: '#facc15',
+    beakShadow: '#f59e0b',
+    eye: '#f8fafc',
+    pupil: '#052e16',
+    shadow: '#052e16',
+    trail: '#86efac',
+    scoreBurst: '#22c55e',
+  },
 ];
 
 let bestScore = Number(localStorage.getItem(STORAGE_KEY) || 0);
@@ -120,7 +137,9 @@ let particles = [];
 bestText.textContent = bestScore;
 
 function isCharacterUnlocked(character) {
-  return Boolean(character) && (!character.locked || secretCharacterUnlocked);
+  if (!character) return false;
+  if (character.unlockScore) return character.unlockScore <= Math.max(score, bestScore);
+  return !character.locked || secretCharacterUnlocked;
 }
 
 function getSelectedCharacter() {
@@ -134,7 +153,9 @@ function syncSecretCharacterLockState() {
     const locked = Boolean(character && !isCharacterUnlocked(character));
     button.classList.toggle('locked', locked);
     button.setAttribute('aria-disabled', String(locked));
-    button.title = locked ? 'Enter the secret code to unlock this bird.' : '';
+    button.title = locked && character?.unlockScore
+      ? `Reach ${character.unlockScore} points to unlock this bird.`
+      : locked ? 'Enter the secret code to unlock this bird.' : '';
   });
 }
 
@@ -159,10 +180,14 @@ function unlockSecretCharacter() {
 function selectCharacter(characterId, playSound = true) {
   const character = CHARACTERS.find((entry) => entry.id === characterId) || CHARACTERS[0];
   if (!isCharacterUnlocked(character)) {
-    secretMessage.textContent = 'Enter the secret code to unlock this character.';
-    secretUnlock.hidden = false;
-    secretButton.setAttribute('aria-expanded', 'true');
-    secretCodeInput.focus();
+    secretMessage.textContent = character.unlockScore
+      ? `Reach ${character.unlockScore} points to unlock ${character.name}.`
+      : 'Enter the secret code to unlock this character.';
+    if (!character.unlockScore) {
+      secretUnlock.hidden = false;
+      secretButton.setAttribute('aria-expanded', 'true');
+      secretCodeInput.focus();
+    }
     playPauseSound();
     return;
   }
@@ -271,6 +296,11 @@ function playTone(frequency, duration, type = 'square', volume = 0.18, delay = 0
 function playFlapSound() {
   const tone = playTone(620, 0.08, 'square', 0.14);
   if (tone && audioContext) tone.frequency.exponentialRampToValueAtTime(920, audioContext.currentTime + 0.08);
+}
+
+function playQuackSound() {
+  playTone(260, 0.09, 'sawtooth', 0.16);
+  playTone(210, 0.12, 'sawtooth', 0.14, 0.06);
 }
 
 function playScoreSound() {
@@ -471,7 +501,7 @@ function flap() {
     return;
   }
   bird.velocity = -435;
-  playFlapSound();
+  getSelectedCharacter().id === 'duck' ? playQuackSound() : playFlapSound();
   const character = getSelectedCharacter();
   burst(bird.x - 12, bird.y + 18, character.trail, 5);
 }
@@ -533,6 +563,7 @@ function update(dt) {
       pipe.passed = true;
       score += 1;
       updateScore();
+      syncSecretCharacterLockState();
       playScoreSound();
       const character = getSelectedCharacter();
       burst(bird.x, bird.y, character.scoreBurst, 8);
@@ -649,10 +680,19 @@ function drawBirdSprite(targetCtx, character, wingY) {
   targetCtx.fillRect(-20, -18, 36, 30);
   targetCtx.fillStyle = character.crest;
   targetCtx.fillRect(-14, -24, 26, 12);
-  targetCtx.fillStyle = character.beak;
-  targetCtx.fillRect(10, -5, 22, 10);
-  targetCtx.fillStyle = character.beakShadow;
-  targetCtx.fillRect(18, 3, 14, 8);
+  if (character.species === 'duck') {
+    targetCtx.fillStyle = character.crest;
+    targetCtx.fillRect(-10, -18, 20, 24);
+    targetCtx.fillStyle = character.beak;
+    targetCtx.fillRect(12, -7, 26, 12);
+    targetCtx.fillStyle = character.beakShadow;
+    targetCtx.fillRect(24, 3, 14, 7);
+  } else {
+    targetCtx.fillStyle = character.beak;
+    targetCtx.fillRect(10, -5, 22, 10);
+    targetCtx.fillStyle = character.beakShadow;
+    targetCtx.fillRect(18, 3, 14, 8);
+  }
   targetCtx.fillStyle = character.eye;
   targetCtx.fillRect(2, -15, 10, 10);
   targetCtx.fillStyle = character.pupil;

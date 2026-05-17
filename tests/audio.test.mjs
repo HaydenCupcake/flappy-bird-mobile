@@ -29,6 +29,7 @@ assert.match(js, /createGain\(/, 'generated audio should use gain nodes');
   'installAudioUnlock',
   'unlockAudio',
   'playFlapSound',
+  'playQuackSound',
   'playScoreSound',
   'playCharacterSelectSound',
   'playPauseSound',
@@ -58,6 +59,8 @@ assert.match(js, /function playSecretUnlockSound\(\) \{[\s\S]*playScoreSound\(\)
 assert.match(js, /function playSecretFailureSound\(\) \{[\s\S]*playGameOverSound\(\);[\s\S]*\}/, 'wrong secret code should reuse the existing failure game-over sound');
 assert.match(js, /enteredCode !== SECRET_UNLOCK_CODE[\s\S]*playSecretFailureSound\(\)/, 'wrong secret code should play the failure sound');
 assert.match(js, /secretCharacterUnlocked = true;[\s\S]*playSecretUnlockSound\(\)/, 'correct secret code should play the happy unlock sound');
+assert.match(js, /function playQuackSound\(\) \{[\s\S]*playTone\(260, 0\.09, 'sawtooth', 0\.16\);[\s\S]*playTone\(210, 0\.12, 'sawtooth', 0\.14, 0\.06\);[\s\S]*\}/, 'duck should have a quack sound made from low sawtooth tones');
+assert.match(js, /getSelectedCharacter\(\)\.id === 'duck' \? playQuackSound\(\) : playFlapSound\(\)/, 'duck should quack instead of using the normal flap sound');
 assert.match(js, /startMusicMode\('gameplay', \['playing'\]/, 'gameplay music should be limited to playing state');
 assert.match(js, /if \(state === 'playing'\) startGameplayMusic\(\)/, 'background music dispatcher should choose gameplay music while playing');
 assert.match(js, /else if \(state === 'ready' \|\| state === 'gameover'\) startStartScreenMusic\(\)/, 'background music dispatcher should choose start-screen music outside gameplay');
