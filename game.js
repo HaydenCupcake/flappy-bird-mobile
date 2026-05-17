@@ -143,11 +143,12 @@ function unlockSecretCharacter() {
   if (enteredCode !== SECRET_UNLOCK_CODE) {
     secretMessage.textContent = 'Wrong code. Try again.';
     secretCodeInput.select();
-    playPauseSound();
+    playSecretFailureSound();
     return;
   }
 
   secretCharacterUnlocked = true;
+  playSecretUnlockSound();
   secretMessage.textContent = 'Unlocked Six Seven for this game session! Enter the code again next time the game page starts.';
   secretButton.textContent = 'Unlocked';
   secretButton.setAttribute('aria-expanded', 'true');
@@ -297,6 +298,14 @@ function playGameOverSound() {
   playTone(165, 0.22, 'sawtooth', 0.13, 0.12);
 }
 
+function playSecretUnlockSound() {
+  playScoreSound();
+}
+
+function playSecretFailureSound() {
+  playGameOverSound();
+}
+
 function startMusicMode(mode, allowedStates, melody, bass, interval) {
   if (!allowedStates.includes(state) || document.hidden || !soundEnabled || !setupAudio()) return;
   if (musicTimer && musicMode === mode) return;
@@ -311,8 +320,8 @@ function startMusicMode(mode, allowedStates, melody, bass, interval) {
     }
 
     backgroundOscillators = backgroundOscillators.filter((oscillator) => oscillator.context.currentTime < oscillator.stopTime);
-    const melodyOscillator = playTone(melody[musicStep % melody.length], 0.16, 'triangle', 0.045);
-    const bassOscillator = playTone(bass[musicStep % bass.length], 0.18, 'sine', 0.032);
+    const melodyOscillator = playTone(melody[musicStep % melody.length], 0.16, 'triangle', 0.0675);
+    const bassOscillator = playTone(bass[musicStep % bass.length], 0.18, 'sine', 0.048);
     if (melodyOscillator) melodyOscillator.stopTime = audioContext.currentTime + 0.18;
     if (bassOscillator) bassOscillator.stopTime = audioContext.currentTime + 0.2;
     backgroundOscillators.push(...[melodyOscillator, bassOscillator].filter(Boolean));
@@ -325,6 +334,10 @@ function startMusicMode(mode, allowedStates, melody, bass, interval) {
 
 function startStartScreenMusic() {
   startMusicMode('start-screen', ['ready', 'gameover'], [392, 494, 587, 659, 587, 494], [196, 247, 294, 247, 220, 247], 320);
+}
+
+function startIntroMusic() {
+  startStartScreenMusic();
 }
 
 function startGameplayMusic() {
@@ -746,7 +759,7 @@ if (!isCharacterUnlocked(CHARACTERS.find((entry) => entry.id === selectedCharact
 }
 selectCharacter(selectedCharacterId, false);
 setOverlay(true, 'Ready', 'Flap Through Neon Gates', 'Avoid the towers, collect points, and keep your tiny rocket bird airborne.', 'Start Game');
-startStartScreenMusic();
+startIntroMusic();
 draw();
 animationFrame = requestAnimationFrame(loop);
 

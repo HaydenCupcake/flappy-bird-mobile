@@ -13,7 +13,7 @@ assert.match(js, /STORAGE_KEY_AUDIO = 'sky-hopper-audio-enabled'/, 'audio prefer
 assert.match(js, /localStorage\.getItem\(STORAGE_KEY_AUDIO\) !== 'false'/, 'audio should default on unless persisted off');
 assert.match(js, /localStorage\.setItem\(STORAGE_KEY_AUDIO, String\(soundEnabled\)\)/, 'audio preference should persist');
 assert.match(js, /selectCharacter\(selectedCharacterId, false\)/, 'initial character render should not autoplay audio');
-assert.match(js, /startStartScreenMusic\(\);\ndraw\(\);/, 'start-screen music should be attempted after the ready overlay is shown');
+assert.match(js, /startIntroMusic\(\);\ndraw\(\);/, 'intro music should be attempted after the ready overlay is shown');
 assert.match(js, /window\.AudioContext \|\| window\.webkitAudioContext/, 'Web Audio API setup should support browser prefixes');
 assert.match(js, /createOscillator\(/, 'generated audio should use oscillators');
 assert.match(js, /createGain\(/, 'generated audio should use gain nodes');
@@ -34,6 +34,9 @@ assert.match(js, /createGain\(/, 'generated audio should use gain nodes');
   'playPauseSound',
   'playResumeSound',
   'playGameOverSound',
+  'playSecretUnlockSound',
+  'playSecretFailureSound',
+  'startIntroMusic',
 ].forEach((name) => {
   assert.match(js, new RegExp(`function ${name}\\(`), `${name} should be defined`);
 });
@@ -47,6 +50,14 @@ assert.match(js, /window\.addEventListener\('keydown', unlockAudio, true\)/, 'ke
 assert.match(js, /if \(audioContext\.state === 'suspended'\) \{[\s\S]*installAudioUnlock\(\)/, 'suspended audio contexts should install the first-interaction unlock');
 assert.match(js, /function unlockAudio\(\) \{[\s\S]*stopBackgroundMusic\(\);[\s\S]*startStartScreenMusic\(\);[\s\S]*\}/, 'first interaction should restart start-screen music while ready or gameover');
 assert.match(js, /startMusicMode\('start-screen', \['ready', 'gameover'\]/, 'start-screen music should be limited to ready and gameover states');
+assert.match(js, /function startIntroMusic\(\) \{[\s\S]*startStartScreenMusic\(\);[\s\S]*\}/, 'start game screen should expose intro music that starts the ready-screen loop');
+assert.match(js, /startIntroMusic\(\);\ndraw\(\);/, 'intro music should be attempted after the ready overlay is shown');
+assert.match(js, /playTone\(melody\[musicStep % melody\.length\], 0\.16, 'triangle', 0\.0675\)/, 'background melody should be 50% louder');
+assert.match(js, /playTone\(bass\[musicStep % bass\.length\], 0\.18, 'sine', 0\.048\)/, 'background bass should be 50% louder');
+assert.match(js, /function playSecretUnlockSound\(\) \{[\s\S]*playScoreSound\(\);[\s\S]*\}/, 'correct secret code should reuse the existing happy score sound');
+assert.match(js, /function playSecretFailureSound\(\) \{[\s\S]*playGameOverSound\(\);[\s\S]*\}/, 'wrong secret code should reuse the existing failure game-over sound');
+assert.match(js, /enteredCode !== SECRET_UNLOCK_CODE[\s\S]*playSecretFailureSound\(\)/, 'wrong secret code should play the failure sound');
+assert.match(js, /secretCharacterUnlocked = true;[\s\S]*playSecretUnlockSound\(\)/, 'correct secret code should play the happy unlock sound');
 assert.match(js, /startMusicMode\('gameplay', \['playing'\]/, 'gameplay music should be limited to playing state');
 assert.match(js, /if \(state === 'playing'\) startGameplayMusic\(\)/, 'background music dispatcher should choose gameplay music while playing');
 assert.match(js, /else if \(state === 'ready' \|\| state === 'gameover'\) startStartScreenMusic\(\)/, 'background music dispatcher should choose start-screen music outside gameplay');
