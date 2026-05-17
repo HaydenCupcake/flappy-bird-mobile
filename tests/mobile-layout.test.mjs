@@ -5,18 +5,24 @@ import { join } from 'node:path';
 const root = new URL('..', import.meta.url).pathname;
 const html = readFileSync(join(root, 'index.html'), 'utf8');
 const css = readFileSync(join(root, 'style.css'), 'utf8');
+const appViewportBlock = css.match(/\.app-viewport \{[\s\S]*?\n\}/)?.[0] || '';
+const gameShellBlock = css.match(/\.game-shell \{[\s\S]*?\n\}/)?.[0] || '';
 const canvasWrapBlock = css.match(/\.canvas-wrap \{[\s\S]*?\n\}/)?.[0] || '';
 
 assert.match(html, /<div class="app-viewport">[\s\S]*<main class="game-shell"/, 'game shell should sit inside a fixed viewport wrapper for true centering');
 assert.match(
-  css,
+  appViewportBlock,
   /\.app-viewport \{[\s\S]*position: fixed;[\s\S]*inset: 0;[\s\S]*display: grid;[\s\S]*place-items: center;[\s\S]*overflow: hidden;/,
   'app viewport should own fixed full-screen centering without page overflow'
 );
+assert.doesNotMatch(appViewportBlock, /width:\s*100vw;/, 'fixed inset app viewport must not use 100vw because it can offset/clamp mobile centering');
+assert.doesNotMatch(appViewportBlock, /max-width:\s*100vw;/, 'fixed inset app viewport must not cap itself with 100vw');
+assert.match(appViewportBlock, /width:\s*100%;/, 'fixed inset app viewport should provide a definite percentage content box for centering');
+assert.match(appViewportBlock, /max-width:\s*100%;/, 'fixed inset app viewport should not exceed the browser viewport');
 assert.match(
-  css,
-  /\.app-viewport \{[\s\S]*padding: env\(safe-area-inset-top\) env\(safe-area-inset-right\) env\(safe-area-inset-bottom\) env\(safe-area-inset-left\);/,
-  'safe-area padding should be applied inside the fixed viewport wrapper only'
+  appViewportBlock,
+  /\.app-viewport \{[\s\S]*padding: env\(safe-area-inset-top\) max\(8px, env\(safe-area-inset-right\)\) env\(safe-area-inset-bottom\) max\(8px, env\(safe-area-inset-left\)\);/,
+  'safe-area padding and an inline gutter should be applied inside the fixed viewport wrapper only'
 );
 assert.match(css, /body \{[\s\S]*padding: 0;/, 'body padding should not combine with 100dvh and create mobile overflow');
 assert.match(css, /body \{[\s\S]*width: 100%;/, 'body should not be wider than the viewport');
@@ -30,17 +36,29 @@ assert.match(
 );
 
 assert.match(
-  css,
+  gameShellBlock,
   /\.game-shell \{[\s\S]*grid-template-rows: auto minmax\(0, 1fr\) auto auto;[\s\S]*min-height: 0;/,
   'game shell should reserve the shrinking row for the canvas and avoid an extra visible note row'
 );
-assert.match(css, /\.game-shell \{[\s\S]*height: 100%;[\s\S]*overflow: hidden;[\s\S]*width: min\(100vw, 560px\);/, 'game shell should fit the viewport width without exceeding it');
+assert.doesNotMatch(gameShellBlock, /width:[^;]*100vw/, 'game shell must not use raw 100vw because fixed inset wrappers can make it horizontally overflow or shift');
+assert.doesNotMatch(gameShellBlock, /max-width:[^;]*100vw/, 'game shell max-width must be based on available dynamic viewport width, not raw viewport width');
+assert.match(gameShellBlock, /height: 100%;[\s\S]*overflow: hidden;[\s\S]*width: min\(calc\(100dvw - 16px\), 560px\);/, 'game shell should have a definite centered mobile width based on the visible dynamic viewport minus gutters');
+assert.match(gameShellBlock, /(justify-self:\s*center;|place-self:\s*center;)/, 'game shell should center itself inside the inset viewport content box');
 assert.match(canvasWrapBlock, /min-height: 0;/, 'canvas wrapper should be allowed to shrink inside the viewport grid');
 assert.match(canvasWrapBlock, /height: auto;/, 'canvas wrapper should size from width plus aspect ratio instead of forcing width overflow from a full-height row');
 assert.doesNotMatch(canvasWrapBlock, /height: 100%;/, 'canvas wrapper should not force full row height because that can overflow the phone width');
 assert.match(canvasWrapBlock, /margin: auto;[\s\S]*justify-self: center;[\s\S]*align-self: center;/, 'canvas wrapper should center itself inside the shrinking grid row');
-assert.match(canvasWrapBlock, /width: min\(100%, calc\(100vw - 16px\), calc\(\(100dvh - 236px\) \* 9 \/ 16\), 560px\);/, 'canvas width should be capped from viewport width and remaining viewport height so the full 9:16 game area fits on phones');
+assert.doesNotMatch(css, /\.canvas-wrap \{[\s\S]*width:[^;]*100vw/, 'canvas wrapper width must use the available content width, not raw 100vw');
+assert.doesNotMatch(css, /\.canvas-wrap \{[\s\S]*max-width:[^;]*100vw/, 'canvas wrapper max-width must not use raw 100vw because it can clip inside padded inset wrappers');
+assert.doesNotMatch(css, /calc\(100vw - 16px\)/, 'mobile layout should not compensate for clipping with a raw 100vw subtraction');
+assert.match(canvasWrapBlock, /width: min\(100%, calc\(\(100dvh - 236px\) \* 9 \/ 16\), 560px\);/, 'canvas width should be capped from content width and remaining viewport height so the full 9:16 game area fits on phones');
 assert.doesNotMatch(css, /max-height: min\(56svh, calc\(100dvh - 252px\)\)/, 'compact canvas should not use a fixed viewport subtraction that can still clip on phones');
+
+assert.match(
+  css,
+  /\.top-panel,\s*\n\.controls,\s*\n\.character-picker \{[\s\S]*min-width: 0;[\s\S]*max-width: 100%;[\s\S]*overflow: hidden;[\s\S]*width: 100%;/,
+  'chrome panels should be shrinkable grid items so their min-content width cannot push the mobile shell off center'
+);
 
 assert.match(
   css,
