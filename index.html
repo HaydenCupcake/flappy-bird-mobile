@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#111827">
+    <meta name="description" content="A polished mobile web Flappy Bird-style arcade game built with static HTML, CSS, and JavaScript.">
+    <title>Sky Hopper Arcade</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <main class="game-shell" aria-labelledby="game-title">
+      <section class="top-panel" aria-label="Game status">
+        <div>
+          <h1 id="game-title">Sky Hopper</h1>
+          <p class="subtitle">Tap, click, or press Space to flap.</p>
+        </div>
+        <div class="score-card" aria-live="polite">
+          <span>Score <strong id="scoreText">0</strong></span>
+          <span>Best <strong id="bestText">0</strong></span>
+        </div>
+      </section>
+
+      <section class="canvas-wrap" aria-label="Sky Hopper game area">
+        <canvas id="gameCanvas" width="432" height="768" aria-label="Arcade canvas game" role="img"></canvas>
+        <div id="overlay" class="overlay visible">
+          <div class="panel">
+            <p class="eyebrow" id="stateLabel">Ready</p>
+            <h2 id="stateTitle">Flap Through Neon Gates</h2>
+            <p id="stateCopy">Avoid the towers, collect points, and keep your tiny rocket bird airborne.</p>
+            <button id="primaryButton" type="button">Start Game</button>
+            <p class="help">Controls: tap anywhere, click, press Space, ArrowUp, or the flap button. Press P to pause.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="controls" aria-label="Game controls">
+        <button id="flapButton" type="button" class="flap-button" aria-label="Flap upward">Flap</button>
+        <button id="pauseButton" type="button" class="secondary-button" aria-label="Pause or resume game">Pause</button>
+      </section>
+
+      <p class="screen-reader-note">
+        Sky Hopper is a reflex game. Activate flap to move upward and pass through gaps between towers. Your best score is saved on this device.
+      </p>
+    </main>
+
+    <script src="game.js" defer></script>
+  </body>
+</html>

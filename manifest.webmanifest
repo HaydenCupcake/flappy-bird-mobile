@@ -1,0 +1,9 @@
+{
+  "name": "Sky Hopper Arcade",
+  "short_name": "Sky Hopper",
+  "description": "A static mobile web Flappy Bird-style arcade game.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#111827",
+  "theme_color": "#111827"
+}
