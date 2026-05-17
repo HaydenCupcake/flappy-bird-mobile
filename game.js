@@ -9,13 +9,63 @@ const stateCopy = document.getElementById('stateCopy');
 const primaryButton = document.getElementById('primaryButton');
 const flapButton = document.getElementById('flapButton');
 const pauseButton = document.getElementById('pauseButton');
+const selectedCharacterText = document.getElementById('selectedCharacterText');
+const characterButtons = [...document.querySelectorAll('[data-character]')];
+const previewCanvases = [...document.querySelectorAll('[data-preview]')];
 
 const WIDTH = 432;
 const HEIGHT = 768;
 const STORAGE_KEY = 'sky-hopper-best-score';
+const STORAGE_KEY_CHARACTER = 'sky-hopper-character';
 const groundHeight = 96;
 
+const CHARACTERS = [
+  {
+    id: 'classic',
+    name: 'Classic Yellow',
+    body: '#facc15',
+    crest: '#fde047',
+    wing: '#eab308',
+    beak: '#fb923c',
+    beakShadow: '#f97316',
+    eye: '#f8fafc',
+    pupil: '#020617',
+    shadow: '#020617',
+    trail: '#facc15',
+    scoreBurst: '#38bdf8',
+  },
+  {
+    id: 'ruby',
+    name: 'Ruby Swift',
+    body: '#fb7185',
+    crest: '#fecdd3',
+    wing: '#e11d48',
+    beak: '#fbbf24',
+    beakShadow: '#f59e0b',
+    eye: '#fff1f2',
+    pupil: '#450a0a',
+    shadow: '#020617',
+    trail: '#fb7185',
+    scoreBurst: '#f9a8d4',
+  },
+  {
+    id: 'midnight',
+    name: 'Midnight Comet',
+    body: '#312e81',
+    crest: '#818cf8',
+    wing: '#1e1b4b',
+    beak: '#22d3ee',
+    beakShadow: '#0891b2',
+    eye: '#e0f2fe',
+    pupil: '#020617',
+    shadow: '#020617',
+    trail: '#818cf8',
+    scoreBurst: '#22d3ee',
+  },
+];
+
 let bestScore = Number(localStorage.getItem(STORAGE_KEY) || 0);
+let selectedCharacterId = localStorage.getItem(STORAGE_KEY_CHARACTER) || CHARACTERS[0].id;
 let state = 'ready';
 let score = 0;
 let lastTime = 0;
@@ -36,6 +86,42 @@ let pipes = [];
 let particles = [];
 
 bestText.textContent = bestScore;
+
+function getSelectedCharacter() {
+  return CHARACTERS.find((character) => character.id === selectedCharacterId) || CHARACTERS[0];
+}
+
+function selectCharacter(characterId) {
+  const character = CHARACTERS.find((entry) => entry.id === characterId) || CHARACTERS[0];
+  selectedCharacterId = character.id;
+  localStorage.setItem(STORAGE_KEY_CHARACTER, character.id);
+  selectedCharacterText.textContent = character.name;
+
+  characterButtons.forEach((button) => {
+    const selected = button.dataset.character === character.id;
+    button.classList.toggle('selected', selected);
+    button.setAttribute('aria-pressed', String(selected));
+  });
+
+  drawCharacterPreviews();
+}
+
+function drawCharacterPreviews() {
+  previewCanvases.forEach((previewCanvas) => {
+    const previewCtx = previewCanvas.getContext('2d');
+    const character = CHARACTERS.find((entry) => entry.id === previewCanvas.dataset.preview) || CHARACTERS[0];
+    drawCharacterPreview(previewCtx, character);
+  });
+}
+
+function drawCharacterPreview(previewCtx, character) {
+  previewCtx.clearRect(0, 0, 72, 56);
+  previewCtx.save();
+  previewCtx.translate(36, 30);
+  previewCtx.scale(0.86, 0.86);
+  drawBirdSprite(previewCtx, character, 0);
+  previewCtx.restore();
+}
 
 function resetGame() {
   score = 0;
@@ -103,7 +189,8 @@ function endGame() {
     'Restart'
   );
   pauseButton.textContent = 'Pause';
-  burst(bird.x, bird.y, '#fb7185', 16);
+  const character = getSelectedCharacter();
+  burst(bird.x, bird.y, character.body, 16);
 }
 
 function flap() {
@@ -116,7 +203,8 @@ function flap() {
     return;
   }
   bird.velocity = -435;
-  burst(bird.x - 12, bird.y + 18, '#facc15', 5);
+  const character = getSelectedCharacter();
+  burst(bird.x - 12, bird.y + 18, character.trail, 5);
 }
 
 function togglePause() {
@@ -176,7 +264,8 @@ function update(dt) {
       pipe.passed = true;
       score += 1;
       updateScore();
-      burst(bird.x, bird.y, '#38bdf8', 8);
+      const character = getSelectedCharacter();
+      burst(bird.x, bird.y, character.scoreBurst, 8);
     }
   });
   pipes = pipes.filter((pipe) => pipe.x + pipe.width > -20);
@@ -279,26 +368,27 @@ function drawBird() {
   ctx.save();
   ctx.translate(bird.x, bird.y);
   ctx.rotate(bird.rotation);
-
-  ctx.fillStyle = '#020617';
-  ctx.fillRect(-18, -15, 39, 31);
-  ctx.fillStyle = '#facc15';
-  ctx.fillRect(-20, -18, 36, 30);
-  ctx.fillStyle = '#fde047';
-  ctx.fillRect(-14, -24, 26, 12);
-  ctx.fillStyle = '#fb923c';
-  ctx.fillRect(10, -5, 22, 10);
-  ctx.fillStyle = '#f97316';
-  ctx.fillRect(18, 3, 14, 8);
-  ctx.fillStyle = '#f8fafc';
-  ctx.fillRect(2, -15, 10, 10);
-  ctx.fillStyle = '#020617';
-  ctx.fillRect(7, -11, 4, 4);
-  ctx.fillStyle = '#eab308';
-  const wingY = Math.sin(performance.now() / 80) * 5;
-  ctx.fillRect(-20, wingY, 19, 12);
-
+  drawBirdSprite(ctx, getSelectedCharacter(), Math.sin(performance.now() / 80) * 5);
   ctx.restore();
+}
+
+function drawBirdSprite(targetCtx, character, wingY) {
+  targetCtx.fillStyle = character.shadow;
+  targetCtx.fillRect(-18, -15, 39, 31);
+  targetCtx.fillStyle = character.body;
+  targetCtx.fillRect(-20, -18, 36, 30);
+  targetCtx.fillStyle = character.crest;
+  targetCtx.fillRect(-14, -24, 26, 12);
+  targetCtx.fillStyle = character.beak;
+  targetCtx.fillRect(10, -5, 22, 10);
+  targetCtx.fillStyle = character.beakShadow;
+  targetCtx.fillRect(18, 3, 14, 8);
+  targetCtx.fillStyle = character.eye;
+  targetCtx.fillRect(2, -15, 10, 10);
+  targetCtx.fillStyle = character.pupil;
+  targetCtx.fillRect(7, -11, 4, 4);
+  targetCtx.fillStyle = character.wing;
+  targetCtx.fillRect(-20, wingY, 19, 12);
 }
 
 function drawParticles() {
@@ -352,6 +442,9 @@ primaryButton.addEventListener('click', () => {
 });
 flapButton.addEventListener('click', flap);
 pauseButton.addEventListener('click', togglePause);
+characterButtons.forEach((button) => {
+  button.addEventListener('click', () => selectCharacter(button.dataset.character));
+});
 document.addEventListener('pointerdown', (event) => {
   if (event.target.closest('button')) return;
   flap();
@@ -361,6 +454,7 @@ document.addEventListener('visibilitychange', () => {
   if (document.hidden && state === 'playing') pauseGame();
 });
 
+selectCharacter(selectedCharacterId);
 setOverlay(true, 'Ready', 'Flap Through Neon Gates', 'Avoid the towers, collect points, and keep your tiny rocket bird airborne.', 'Start Game');
 draw();
 animationFrame = requestAnimationFrame(loop);

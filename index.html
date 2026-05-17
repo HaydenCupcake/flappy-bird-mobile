@@ -35,6 +35,27 @@
         </div>
       </section>
 
+      <section class="character-picker" aria-label="Choose your bird character">
+        <div class="character-picker-copy">
+          <p class="eyebrow">Bird Select</p>
+          <p id="selectedCharacterText">Classic Yellow</p>
+        </div>
+        <div class="character-options" role="list" aria-label="Available bird characters">
+          <button class="character-option selected" type="button" data-character="classic" aria-pressed="true">
+            <canvas width="72" height="56" aria-hidden="true" data-preview="classic"></canvas>
+            <span>Classic</span>
+          </button>
+          <button class="character-option" type="button" data-character="ruby" aria-pressed="false">
+            <canvas width="72" height="56" aria-hidden="true" data-preview="ruby"></canvas>
+            <span>Ruby</span>
+          </button>
+          <button class="character-option" type="button" data-character="midnight" aria-pressed="false">
+            <canvas width="72" height="56" aria-hidden="true" data-preview="midnight"></canvas>
+            <span>Midnight</span>
+          </button>
+        </div>
+      </section>
+
       <section class="controls" aria-label="Game controls">
         <button id="flapButton" type="button" class="flap-button" aria-label="Flap upward">Flap</button>
         <button id="pauseButton" type="button" class="secondary-button" aria-label="Pause or resume game">Pause</button>

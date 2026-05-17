@@ -9,6 +9,7 @@ Open `index.html` in a browser, or publish the repo with GitHub Pages.
 Controls:
 
 - Tap or click anywhere on the game canvas to flap.
+- Pick Classic, Ruby, or Midnight from the bird selector before or between runs.
 - Use the on-screen Flap button on touch devices.
 - Press `Space` or `ArrowUp` to flap.
 - Press `P` or the Pause button to pause/resume.
@@ -18,6 +19,7 @@ Controls:
 - Responsive HTML5 canvas for phone portrait and desktop browsers.
 - Start screen, pause/resume, visibility auto-pause, game over, and restart flow.
 - Score display and best score saved with `localStorage`.
+- Three selectable bird characters with the current pick saved on this device.
 - Increasing speed and tighter gate spacing as your score rises.
 - Original pixel-art arcade visuals with no copyrighted Flappy Bird assets.
 - Accessible visible instructions and keyboard controls.

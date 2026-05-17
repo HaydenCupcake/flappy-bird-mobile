@@ -44,7 +44,8 @@ body {
 }
 
 .top-panel,
-.controls {
+.controls,
+.character-picker {
   align-items: center;
   background: var(--panel);
   border: 2px solid var(--panel-border);
@@ -181,6 +182,66 @@ button {
   width: 100%;
 }
 
+.character-picker {
+  align-items: stretch;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.character-picker-copy {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+#selectedCharacterText {
+  color: var(--ink);
+  font-size: 0.86rem;
+  font-weight: 900;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+.character-options {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.character-option {
+  align-items: center;
+  background: rgba(15, 23, 42, 0.82);
+  border: 2px solid rgba(148, 163, 184, 0.44);
+  box-shadow: 3px 3px 0 #020617;
+  color: var(--ink);
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  min-height: 86px;
+  padding: 6px 4px;
+  text-transform: uppercase;
+}
+
+.character-option canvas {
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.24), rgba(15, 23, 42, 0.7));
+  border: 2px solid rgba(2, 6, 23, 0.8);
+  height: 42px;
+  image-rendering: pixelated;
+  width: 54px;
+}
+
+.character-option span {
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.character-option.selected {
+  background: linear-gradient(180deg, rgba(250, 204, 21, 0.28), rgba(56, 189, 248, 0.18));
+  border-color: var(--accent);
+  color: #fef9c3;
+}
+
 .controls {
   gap: 10px;
   padding: 10px;
@@ -227,6 +288,7 @@ button:focus-visible {
 
   .top-panel,
   .canvas-wrap,
+  .character-picker,
   .screen-reader-note {
     grid-column: 1;
   }
