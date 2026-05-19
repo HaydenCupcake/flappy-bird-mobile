@@ -17,6 +17,16 @@ const secretMessage = document.getElementById('secretMessage');
 const selectedCharacterText = document.getElementById('selectedCharacterText');
 const characterButtons = [...document.querySelectorAll('[data-character]')];
 const previewCanvases = [...document.querySelectorAll('[data-preview]')];
+const EAGLE_SPRITE_SHEET = new Image();
+EAGLE_SPRITE_SHEET.decoding = 'async';
+EAGLE_SPRITE_SHEET.src = 'assets/eagle-sprite-sheet.png';
+
+const EAGLE_SPRITE_FRAMES = [
+  { x: 52, y: 192, w: 324, h: 438 },
+  { x: 413, y: 375, w: 342, h: 255 },
+  { x: 792, y: 461, w: 322, h: 253 },
+  { x: 1162, y: 341, w: 333, h: 289 },
+];
 
 const WIDTH = 432;
 const HEIGHT = 768;
@@ -68,6 +78,21 @@ const CHARACTERS = [
     shadow: '#020617',
     trail: '#818cf8',
     scoreBurst: '#22d3ee',
+  },
+  {
+    id: 'eagle',
+    name: 'Sky Eagle',
+    body: '#6b3f12',
+    crest: '#f8f0e3',
+    wing: '#a16207',
+    beak: '#facc15',
+    beakShadow: '#d97706',
+    eye: '#fff7ed',
+    pupil: '#111827',
+    shadow: '#111827',
+    trail: '#f59e0b',
+    scoreBurst: '#fde68a',
+    species: 'eagle',
   },
   {
     id: 'duck',
@@ -160,6 +185,7 @@ let soundEnabled = localStorage.getItem(STORAGE_KEY_AUDIO) !== 'false';
 let backgroundOscillators = [];
 let audioUnlockInstalled = false;
 let lastTouchEnd = 0;
+let milestone30SoundPlayed = false;
 
 const bird = {
   x: 112,
@@ -369,6 +395,13 @@ function playScoreSound() {
   playTone(1175, 0.1, 'triangle', 0.14, 0.07);
 }
 
+function playMilestone30Sound() {
+  playTone(523, 0.08, 'triangle', 0.18);
+  playTone(659, 0.1, 'triangle', 0.16, 0.06);
+  playTone(784, 0.12, 'square', 0.14, 0.12);
+  playTone(1047, 0.16, 'triangle', 0.13, 0.21);
+}
+
 function playCharacterSelectSound() {
   playTone(520, 0.05, 'triangle', 0.1);
   playTone(660, 0.07, 'triangle', 0.09, 0.045);
@@ -469,7 +502,7 @@ function drawCharacterPreview(previewCtx, character) {
   previewCtx.save();
   previewCtx.translate(36, 30);
   previewCtx.scale(0.86, 0.86);
-  drawBirdSprite(previewCtx, character, 0);
+  drawBirdSprite(previewCtx, character, 0, 0);
   previewCtx.restore();
 }
 
@@ -480,6 +513,7 @@ function resetGame() {
   groundOffset = 0;
   pipes = [];
   particles = [];
+  milestone30SoundPlayed = false;
   bird.y = 310;
   bird.velocity = 0;
   bird.rotation = 0;
@@ -626,6 +660,10 @@ function update(dt) {
       updateScore();
       syncSecretCharacterLockState();
       playScoreSound();
+      if (!milestone30SoundPlayed && score === 30) {
+        milestone30SoundPlayed = true;
+        playMilestone30Sound();
+      }
       const character = getSelectedCharacter();
       burst(bird.x, bird.y, character.scoreBurst, 8);
     }
@@ -749,11 +787,17 @@ function drawBird() {
   ctx.save();
   ctx.translate(bird.x, bird.y);
   ctx.rotate(bird.rotation);
-  drawBirdSprite(ctx, getSelectedCharacter(), Math.sin(performance.now() / 80) * 5);
+  const character = getSelectedCharacter();
+  const eagleFrame = Math.floor(performance.now() / 95) % EAGLE_SPRITE_FRAMES.length;
+  drawBirdSprite(ctx, character, Math.sin(performance.now() / 80) * 5, eagleFrame);
   ctx.restore();
 }
 
-function drawBirdSprite(targetCtx, character, wingY) {
+function drawBirdSprite(targetCtx, character, wingY, frameIndex = 0) {
+  if (character.species === 'eagle') {
+    drawEagleSprite(targetCtx, frameIndex);
+    return;
+  }
   if (character.species === 'clock') {
     targetCtx.fillStyle = character.wing;
     targetCtx.fillRect(-30, wingY - 6, 18, 12);
@@ -824,6 +868,37 @@ function drawBirdSprite(targetCtx, character, wingY) {
     targetCtx.textBaseline = 'middle';
     targetCtx.fillText('67', -2, -5);
   }
+}
+
+function drawEagleSprite(targetCtx, frameIndex = 0) {
+  const frame = EAGLE_SPRITE_FRAMES[frameIndex % EAGLE_SPRITE_FRAMES.length];
+  if (!frame || !EAGLE_SPRITE_SHEET.complete || !EAGLE_SPRITE_SHEET.naturalWidth) {
+    targetCtx.save();
+    targetCtx.fillStyle = '#4b2e0f';
+    targetCtx.fillRect(-20, -12, 40, 24);
+    targetCtx.fillStyle = '#f8f0e3';
+    targetCtx.fillRect(2, -16, 14, 12);
+    targetCtx.fillStyle = '#facc15';
+    targetCtx.fillRect(14, -6, 16, 8);
+    targetCtx.restore();
+    return;
+  }
+
+  const bob = Math.sin(performance.now() / 95) * 2.5;
+  targetCtx.save();
+  targetCtx.translate(0, bob);
+  targetCtx.drawImage(
+    EAGLE_SPRITE_SHEET,
+    frame.x,
+    frame.y,
+    frame.w,
+    frame.h,
+    -26,
+    -20,
+    52,
+    40
+  );
+  targetCtx.restore();
 }
 
 function drawSugarStarSprite(targetCtx, character, wingY) {
@@ -944,6 +1019,7 @@ document.addEventListener('pointerdown', (event) => {
 document.addEventListener('touchstart', preventGestureZoom, { passive: false });
 document.addEventListener('touchend', preventDoubleTapZoom, { passive: false });
 document.addEventListener('gesturestart', preventGestureZoom, { passive: false });
+EAGLE_SPRITE_SHEET.addEventListener('load', drawCharacterPreviews);
 window.addEventListener('keydown', handleKey);
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
