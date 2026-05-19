@@ -81,6 +81,9 @@ assert.match(js, /score \+= 1;[\s\S]*syncSecretCharacterLockState\(\)/, 'charact
 assert.match(js, /function drawCharacterPreview/, 'character picker preview renderer should exist');
 assert.match(js, /function drawBirdSprite/, 'game bird should be drawn from selected character data');
 assert.match(js, /function drawEagleSprite\(/, 'eagle character should have a dedicated sprite renderer');
+assert.match(js, /globalAlpha = currentAlpha;[\s\S]*globalAlpha = nextAlpha;[\s\S]*drawImage\([\s\S]*nextFrame\.x/, 'eagle sprite should blend adjacent frames for smoother motion');
+assert.match(js, /function drawBird\(now = performance\.now\(\)\)/, 'bird renderer should accept a shared animation timestamp');
+assert.match(js, /function draw\(now = performance\.now\(\)\)/, 'main draw loop should pass the frame timestamp through');
 assert.match(js, /character\.badge === '67'/, 'bird sprite should draw a 67 badge for the secret character');
 assert.match(js, /character\.species === 'clock'/, 'clock sprite should draw clock-specific details');
 assert.match(js, /character\.species === 'eagle'/, 'eagle sprite should use the sprite sheet branch');

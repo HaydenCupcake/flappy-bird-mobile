@@ -783,19 +783,19 @@ function drawGround() {
   }
 }
 
-function drawBird() {
+function drawBird(now = performance.now()) {
   ctx.save();
   ctx.translate(bird.x, bird.y);
   ctx.rotate(bird.rotation);
   const character = getSelectedCharacter();
-  const eagleFrame = Math.floor(performance.now() / 95) % EAGLE_SPRITE_FRAMES.length;
-  drawBirdSprite(ctx, character, Math.sin(performance.now() / 80) * 5, eagleFrame);
+  const eagleFrame = Math.floor(now / 95) % EAGLE_SPRITE_FRAMES.length;
+  drawBirdSprite(ctx, character, Math.sin(now / 80) * 5, eagleFrame, now);
   ctx.restore();
 }
 
-function drawBirdSprite(targetCtx, character, wingY, frameIndex = 0) {
+function drawBirdSprite(targetCtx, character, wingY, frameIndex = 0, now = performance.now()) {
   if (character.species === 'eagle') {
-    drawEagleSprite(targetCtx, frameIndex);
+    drawEagleSprite(targetCtx, frameIndex, now);
     return;
   }
   if (character.species === 'clock') {
@@ -870,9 +870,13 @@ function drawBirdSprite(targetCtx, character, wingY, frameIndex = 0) {
   }
 }
 
-function drawEagleSprite(targetCtx, frameIndex = 0) {
-  const frame = EAGLE_SPRITE_FRAMES[frameIndex % EAGLE_SPRITE_FRAMES.length];
-  if (!frame || !EAGLE_SPRITE_SHEET.complete || !EAGLE_SPRITE_SHEET.naturalWidth) {
+function drawEagleSprite(targetCtx, frameIndex = 0, now = performance.now()) {
+  const frameCount = EAGLE_SPRITE_FRAMES.length;
+  const currentFrameIndex = frameIndex % frameCount;
+  const nextFrameIndex = (currentFrameIndex + 1) % frameCount;
+  const frame = EAGLE_SPRITE_FRAMES[currentFrameIndex];
+  const nextFrame = EAGLE_SPRITE_FRAMES[nextFrameIndex];
+  if (!frame || !nextFrame || !EAGLE_SPRITE_SHEET.complete || !EAGLE_SPRITE_SHEET.naturalWidth) {
     targetCtx.save();
     targetCtx.fillStyle = '#4b2e0f';
     targetCtx.fillRect(-20, -12, 40, 24);
@@ -884,15 +888,32 @@ function drawEagleSprite(targetCtx, frameIndex = 0) {
     return;
   }
 
-  const bob = Math.sin(performance.now() / 95) * 2.5;
+  const bob = Math.sin(now / 95) * 2.5;
+  const frameBlend = (now % 140) / 140;
+  const currentAlpha = 1 - frameBlend;
+  const nextAlpha = frameBlend;
+
   targetCtx.save();
   targetCtx.translate(0, bob);
+  targetCtx.globalAlpha = currentAlpha;
   targetCtx.drawImage(
     EAGLE_SPRITE_SHEET,
     frame.x,
     frame.y,
     frame.w,
     frame.h,
+    -26,
+    -20,
+    52,
+    40
+  );
+  targetCtx.globalAlpha = nextAlpha;
+  targetCtx.drawImage(
+    EAGLE_SPRITE_SHEET,
+    nextFrame.x,
+    nextFrame.y,
+    nextFrame.w,
+    nextFrame.h,
     -26,
     -20,
     52,
@@ -946,12 +967,12 @@ function drawHud() {
   ctx.fillText(String(score), 30, 48);
 }
 
-function draw() {
+function draw(now = performance.now()) {
   drawBackground();
   drawPipes();
   drawGround();
   drawParticles();
-  drawBird();
+  drawBird(now);
   drawHud();
 }
 
@@ -959,7 +980,7 @@ function loop(now) {
   const dt = Math.min(0.033, (now - lastTime) / 1000 || 0);
   lastTime = now;
   update(dt);
-  draw();
+  draw(now);
   animationFrame = requestAnimationFrame(loop);
 }
 
