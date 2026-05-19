@@ -81,7 +81,11 @@ assert.match(js, /score \+= 1;[\s\S]*syncSecretCharacterLockState\(\)/, 'charact
 assert.match(js, /function drawCharacterPreview/, 'character picker preview renderer should exist');
 assert.match(js, /function drawBirdSprite/, 'game bird should be drawn from selected character data');
 assert.match(js, /function drawEagleSprite\(/, 'eagle character should have a dedicated sprite renderer');
-assert.match(js, /globalAlpha = currentAlpha;[\s\S]*globalAlpha = nextAlpha;[\s\S]*drawImage\([\s\S]*nextFrame\.x/, 'eagle sprite should blend adjacent frames for smoother motion');
+assert.match(js, /const EAGLE_FLAP_FRAME_MS = 220;/, 'eagle flap should advance more slowly than the earlier 95ms cadence');
+assert.match(js, /const EAGLE_FLAP_CYCLE_MS = EAGLE_FLAP_FRAME_MS \* EAGLE_SPRITE_FRAMES\.length;/, 'eagle flap should use a full-cycle duration');
+assert.match(js, /const EAGLE_FLAP_BOB_AMPLITUDE = 1\.6;/, 'eagle bob should stay subtle');
+assert.match(js, /localProgress = framePosition - Math\.floor\(framePosition\);[\s\S]*easedBlend = localProgress \* localProgress \* \(3 - 2 \* localProgress\)/, 'eagle sprite should ease between frames for smoother motion');
+assert.match(js, /globalAlpha = 1 - easedBlend;[\s\S]*globalAlpha = easedBlend;/, 'eagle sprite should crossfade adjacent frames');
 assert.match(js, /function drawBird\(now = performance\.now\(\)\)/, 'bird renderer should accept a shared animation timestamp');
 assert.match(js, /function draw\(now = performance\.now\(\)\)/, 'main draw loop should pass the frame timestamp through');
 assert.match(js, /character\.badge === '67'/, 'bird sprite should draw a 67 badge for the secret character');

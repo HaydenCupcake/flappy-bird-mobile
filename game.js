@@ -27,6 +27,9 @@ const EAGLE_SPRITE_FRAMES = [
   { x: 792, y: 461, w: 322, h: 253 },
   { x: 1162, y: 341, w: 333, h: 289 },
 ];
+const EAGLE_FLAP_FRAME_MS = 220;
+const EAGLE_FLAP_CYCLE_MS = EAGLE_FLAP_FRAME_MS * EAGLE_SPRITE_FRAMES.length;
+const EAGLE_FLAP_BOB_AMPLITUDE = 1.6;
 
 const WIDTH = 432;
 const HEIGHT = 768;
@@ -788,7 +791,7 @@ function drawBird(now = performance.now()) {
   ctx.translate(bird.x, bird.y);
   ctx.rotate(bird.rotation);
   const character = getSelectedCharacter();
-  const eagleFrame = Math.floor(now / 95) % EAGLE_SPRITE_FRAMES.length;
+  const eagleFrame = Math.floor(now / EAGLE_FLAP_FRAME_MS) % EAGLE_SPRITE_FRAMES.length;
   drawBirdSprite(ctx, character, Math.sin(now / 80) * 5, eagleFrame, now);
   ctx.restore();
 }
@@ -872,8 +875,12 @@ function drawBirdSprite(targetCtx, character, wingY, frameIndex = 0, now = perfo
 
 function drawEagleSprite(targetCtx, frameIndex = 0, now = performance.now()) {
   const frameCount = EAGLE_SPRITE_FRAMES.length;
-  const currentFrameIndex = frameIndex % frameCount;
+  const cycleProgress = (now % EAGLE_FLAP_CYCLE_MS) / EAGLE_FLAP_CYCLE_MS;
+  const framePosition = cycleProgress * frameCount;
+  const currentFrameIndex = Math.floor(framePosition) % frameCount;
   const nextFrameIndex = (currentFrameIndex + 1) % frameCount;
+  const localProgress = framePosition - Math.floor(framePosition);
+  const easedBlend = localProgress * localProgress * (3 - 2 * localProgress);
   const frame = EAGLE_SPRITE_FRAMES[currentFrameIndex];
   const nextFrame = EAGLE_SPRITE_FRAMES[nextFrameIndex];
   if (!frame || !nextFrame || !EAGLE_SPRITE_SHEET.complete || !EAGLE_SPRITE_SHEET.naturalWidth) {
@@ -888,14 +895,11 @@ function drawEagleSprite(targetCtx, frameIndex = 0, now = performance.now()) {
     return;
   }
 
-  const bob = Math.sin(now / 95) * 2.5;
-  const frameBlend = (now % 140) / 140;
-  const currentAlpha = 1 - frameBlend;
-  const nextAlpha = frameBlend;
+  const bob = Math.sin((now / EAGLE_FLAP_CYCLE_MS) * Math.PI * 2) * EAGLE_FLAP_BOB_AMPLITUDE;
 
   targetCtx.save();
   targetCtx.translate(0, bob);
-  targetCtx.globalAlpha = currentAlpha;
+  targetCtx.globalAlpha = 1 - easedBlend;
   targetCtx.drawImage(
     EAGLE_SPRITE_SHEET,
     frame.x,
@@ -907,7 +911,7 @@ function drawEagleSprite(targetCtx, frameIndex = 0, now = performance.now()) {
     52,
     40
   );
-  targetCtx.globalAlpha = nextAlpha;
+  targetCtx.globalAlpha = easedBlend;
   targetCtx.drawImage(
     EAGLE_SPRITE_SHEET,
     nextFrame.x,
